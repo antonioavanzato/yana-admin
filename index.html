@@ -1,0 +1,1185 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+<meta name="theme-color" content="#2a5254"/>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,400;0,500;0,600;1,400&family=Rubik:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap" rel="stylesheet">
+<link rel="manifest" href="manifest.json"/>
+<title>Заявки — Яна</title>
+<style>
+:root {
+  --primary:      #2a5254;
+  --primary-mid:  #3d7678;
+  --primary-pale: #e9f3f2;
+  --accent:       #c9a96e;
+  --surface:      #fbfaf7;
+  --surface-deep: #f1ede7;
+  --card:         #ffffff;
+  --ink:          #0f0d0b;
+  --ink-60:       rgba(15,13,11,.6);
+  --ink-30:       rgba(15,13,11,.32);
+  --ink-07:       rgba(15,13,11,.08);
+  --white:        #ffffff;
+  --ease:         cubic-bezier(.16,1,.3,1);
+  --ease-out:     cubic-bezier(.22,1,.36,1);
+  --safe-top:     env(safe-area-inset-top, 0px);
+  --safe-bottom:  env(safe-area-inset-bottom, 0px);
+  --new:      #d97706;
+  --new-bg:   #fff7ec;
+  --done:     #2a5254;
+  --done-bg:  #e6f4f4;
+  --danger:   #b91c1c;
+  --danger-bg:#fef2f2;
+  --wa:       #25d366;
+  --wa-bg:    #eafff2;
+  --imsg:     #0a7cff;
+  --imsg-bg:  #eaf3ff;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: none; }
+body {
+  font-family: 'Jost', sans-serif;
+  background: var(--surface);
+  color: var(--ink);
+  min-height: 100dvh;
+  overscroll-behavior: none;
+  -webkit-font-smoothing: antialiased;
+}
+.screen { display: none; flex-direction: column; min-height: 100dvh; }
+.screen.active { display: flex; }
+
+/* LOGIN */
+.login-wrap {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 2.5rem 1.75rem; text-align: center;
+}
+.login-title {
+  font-family: 'Rubik', sans-serif; font-size: 2.4rem; font-weight: 300;
+  margin-bottom: 2.5rem; letter-spacing: -.03em; line-height: 1;
+}
+.login-title em { font-style: italic; color: var(--primary); }
+#loginForm { width: 100%; max-width: 360px; display: flex; flex-direction: column; gap: .85rem; }
+#loginForm input {
+  width: 100%; padding: 1.15rem 1.2rem; border-radius: 16px;
+  border: 1px solid var(--ink-07); background: var(--white);
+  color: var(--ink);
+  font-family: 'Jost', sans-serif; font-size: 1rem;
+  outline: none; transition: border-color .2s;
+}
+#loginForm input:-webkit-autofill,
+#loginForm input:-webkit-autofill:hover,
+#loginForm input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 30px var(--white) inset !important;
+  -webkit-text-fill-color: var(--ink) !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+#loginForm input:focus { border-color: var(--primary); }
+#loginForm .btn-full { margin-top: .35rem; }
+.login-error { color: var(--danger); font-size: .85rem; margin-top: .5rem; min-height: 1.2rem; }
+
+.topbar {
+  position: sticky; top: 0; z-index: 200;
+  background: var(--surface);
+  border-bottom: 1px solid var(--ink-07);
+  padding: calc(1.1rem + var(--safe-top)) 1.5rem 1rem;
+  flex-shrink: 0;
+}
+.topbar-row { display: flex; align-items: center; gap: .85rem; }
+.topbar-name {
+  font-family: 'Rubik', sans-serif;
+  font-size: 1.3rem; font-weight: 300;
+  letter-spacing: -.01em;
+}
+.topbar-name em { font-style: italic; font-weight: 700; color: var(--primary); }
+.topbar-sub { font-size: .78rem; color: var(--ink-60); margin-top: .12rem; }
+.topbar-titles { flex: 1; min-width: 0; }
+.icon-btn {
+  width: 46px; height: 46px;
+  border-radius: 50%;
+  border: 1px solid var(--ink-07);
+  background: var(--white);
+  cursor: pointer; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  -webkit-tap-highlight-color: transparent;
+  transition: background .2s, transform .2s var(--ease), border-color .2s, color .2s;
+  color: var(--ink-60);
+  position: relative;
+}
+.icon-btn:active { background: var(--surface-deep); transform: scale(.91); }
+.icon-btn svg { width: 19px; height: 19px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+/* bell active state */
+.icon-btn.bell-on { color: var(--primary); border-color: var(--primary); background: var(--done-bg); }
+.icon-btn.bell-on svg { fill: var(--primary); }
+.bell-dot {
+  position: absolute; top: 9px; right: 10px;
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--new); border: 2px solid var(--white);
+  display: none;
+}
+.icon-btn.bell-off .bell-dot { display: block; }
+
+/* PULL TO REFRESH */
+.ptr {
+  position: absolute; top: 0; left: 0; right: 0;
+  height: 0; display: flex; align-items: flex-end; justify-content: center;
+  overflow: hidden; pointer-events: none;
+  color: var(--ink-30);
+}
+.ptr-inner { padding-bottom: .55rem; display: flex; flex-direction: column; align-items: center; gap: .35rem; }
+.ptr-spin {
+  width: 22px; height: 22px;
+  border: 2px solid var(--ink-07);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  transition: transform .1s linear;
+}
+.ptr.spinning .ptr-spin { animation: rotate .7s linear infinite; border-top-color: var(--primary); }
+.ptr-txt { font-size: .62rem; text-transform: uppercase; letter-spacing: .12em; font-weight: 600; }
+
+.tag {
+  display: inline-block;
+  font-family: 'Jost', sans-serif;
+  font-size: .6rem; font-weight: 600;
+  letter-spacing: .18em; text-transform: uppercase;
+  padding: .55em 1.3em;
+  border-radius: 999px;
+  border: 1px solid var(--primary-mid);
+  color: var(--primary);
+  background: transparent;
+}
+.tag.new-tag  { border-color: var(--new);  color: var(--new);  background: var(--new-bg);  }
+.tag.done-tag { border-color: var(--done); color: var(--done); background: var(--done-bg); }
+.pulse-wrap { display: inline-flex; align-items: center; gap: .5em; }
+.pulse-dot  { width: 7px; height: 7px; border-radius: 50%; background: #4ade80; position: relative; flex-shrink: 0; }
+.pulse-dot::after {
+  content: ''; position: absolute; inset: -4px;
+  border-radius: 50%; background: rgba(74,222,128,.35);
+  animation: pulse-ring 1.8s ease-out infinite;
+}
+@keyframes pulse-ring { 0% { transform: scale(1); opacity: .6; } 100% { transform: scale(1.6); opacity: 0; } }
+@keyframes rotate { to { transform: rotate(360deg); } }
+
+.tabs-wrap { margin-top: 1rem; }
+.tabs { display: flex; gap: 1.6rem; border-bottom: 1px solid var(--ink-07); }
+.tab-btn {
+  flex: 0 0 auto; padding: .62rem .1rem;
+  border: none; background: transparent;
+  font-family: 'Jost', sans-serif;
+  font-size: .95rem; font-weight: 500;
+  color: var(--ink-60); cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  display: flex; align-items: center; gap: .5rem;
+  transition: color .2s;
+  -webkit-tap-highlight-color: transparent;
+}
+.tab-btn.active { color: var(--ink); border-bottom-color: var(--primary); font-weight: 600; }
+.chip {
+  min-width: 22px; height: 22px; padding: 0 7px;
+  border-radius: 999px; font-size: .66rem; font-weight: 700;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.chip-new   { background: var(--new-bg);  color: var(--new);  }
+.chip-done  { background: var(--done-bg); color: var(--done); }
+.chip-muted { background: var(--ink-07);  color: var(--ink-60); }
+
+.scroll-area {
+  flex: 1; overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 1.75rem 1.5rem calc(3rem + var(--safe-bottom));
+  position: relative;
+}
+.loader {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 6rem 0; gap: 1rem; color: var(--ink-30); font-size: .9rem;
+}
+.spinner {
+  width: 26px; height: 26px;
+  border: 2px solid var(--ink-07);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: rotate .7s linear infinite;
+}
+.empty-state {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 6rem 1rem; text-align: center;
+  color: var(--ink-30); gap: .75rem;
+}
+.empty-icon { font-size: 2.4rem; }
+.empty-text { font-size: .92rem; line-height: 1.6; }
+
+.section-header {
+  display: flex; align-items: baseline;
+  gap: 1rem; margin-bottom: 1.75rem;
+}
+.section-num {
+  font-family: 'Rubik', sans-serif;
+  font-size: .95rem; font-style: italic;
+  font-weight: 300; color: var(--ink-60);
+  flex-shrink: 0;
+}
+.section-title {
+  font-family: 'Rubik', sans-serif;
+  font-size: 2.2rem; font-weight: 300;
+  letter-spacing: -.03em; line-height: .95;
+}
+.section-title em { font-style: italic; color: var(--primary); font-weight: 300; }
+.section-line {
+  display: block; width: 44px; height: 2px;
+  background: var(--accent); border-radius: 999px;
+  margin-top: .6rem;
+}
+.stats-row {
+  display: grid; grid-template-columns: repeat(3,1fr);
+  gap: .6rem; margin-bottom: 2rem;
+}
+.stat-card {
+  background: var(--card);
+  border: 1px solid var(--ink-07);
+  border-radius: 22px;
+  padding: 1.1rem .5rem .85rem;
+  text-align: center;
+  transition: transform .45s var(--ease), box-shadow .45s var(--ease);
+}
+.stat-card:hover { transform: translateY(-3px); box-shadow: 0 18px 40px -20px rgba(15,13,11,.14); }
+.stat-num {
+  font-family: 'Rubik', sans-serif;
+  font-size: 2.2rem; font-weight: 300;
+  line-height: 1; margin-bottom: .25rem;
+  letter-spacing: -.04em;
+}
+.stat-num.c-accent { color: var(--accent); }
+.stat-num.c-primary { color: var(--primary); }
+.stat-num.c-new { color: var(--new); }
+.stat-lbl {
+  font-size: .6rem; text-transform: uppercase;
+  letter-spacing: .1em; color: var(--ink-60);
+  font-weight: 500;
+}
+.date-group { margin-bottom: 2rem; }
+.date-lbl {
+  font-size: .66rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .14em;
+  color: var(--ink-30); margin-bottom: .75rem;
+  display: flex; align-items: center; gap: .65rem;
+}
+.date-lbl.is-today { color: var(--primary); }
+.date-lbl::after { content: ''; flex: 1; height: 1px; background: var(--ink-07); }
+
+.bcard {
+  background: var(--card);
+  border: 1px solid var(--ink-07);
+  border-radius: 24px;
+  padding: 1.3rem 2.6rem 1.3rem 1.35rem;
+  margin-bottom: .65rem;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform .45s var(--ease), box-shadow .45s var(--ease), border-color .3s;
+  position: relative; overflow: hidden;
+}
+.bcard:hover { transform: translateY(-3px); box-shadow: 0 18px 42px -22px rgba(15,13,11,.18); }
+.bcard:active { transform: scale(.985); }
+.bcard.is-new  { border-color: rgba(217,119,6,.30); }
+.bcard-icon {
+  position: absolute; left: 1.35rem; top: 1.45rem;
+  width: 40px; height: 40px;
+  border-radius: 13px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.bcard-icon svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.bcard.is-new  .bcard-icon { background: var(--new-bg);  color: var(--new);  }
+.bcard.is-done .bcard-icon { background: var(--done-bg); color: var(--primary); }
+.bcard-body { padding-left: 3rem; }
+.bcard-top  { display: flex; align-items: baseline; justify-content: space-between; gap: .5rem; margin-bottom: .26rem; }
+.bcard-name { font-family: 'Rubik', sans-serif; font-size: 1.1rem; font-weight: 400; }
+.bcard-time { font-family: 'Rubik', sans-serif; font-size: 1.15rem; font-weight: 700; color: var(--primary); flex-shrink: 0; }
+.bcard-meta { display: flex; align-items: center; gap: .6rem; }
+.bcard-phone { font-size: .86rem; color: var(--ink-60); }
+.bcard-badge { font-size: .6rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; padding: .2rem .6rem; border-radius: 999px; }
+.bcard-badge.is-new  { background: var(--new-bg);  color: var(--new);  }
+.bcard-badge.is-done { background: var(--done-bg); color: var(--done); }
+.bcard-comment {
+  margin-top: .65rem; padding-top: .6rem;
+  border-top: 1px solid var(--ink-07);
+  font-size: .84rem; color: var(--ink-60);
+  line-height: 1.5;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.bcard-chevron {
+  position: absolute; right: 1rem; top: 1.55rem;
+  width: 15px; height: 15px;
+  stroke: var(--ink-30); fill: none;
+  stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round;
+}
+
+.cal-wrap {
+  background: var(--card);
+  border: 1px solid var(--ink-07);
+  border-radius: 26px;
+  padding: 1.4rem;
+  margin-bottom: 1.2rem;
+  transition: box-shadow .45s var(--ease);
+}
+.cal-wrap:hover { box-shadow: 0 18px 42px -22px rgba(15,13,11,.12); }
+.cal-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+.cal-month {
+  font-family: 'Rubik', sans-serif;
+  font-size: 1.05rem; font-weight: 300;
+  font-style: italic; color: var(--ink);
+  letter-spacing: -.01em;
+}
+.cal-nav-btn {
+  width: 38px; height: 38px; border-radius: 50%;
+  border: 1px solid var(--ink-07);
+  background: transparent; color: var(--ink);
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  font-size: .9rem; transition: all .2s;
+  -webkit-tap-highlight-color: transparent;
+}
+.cal-nav-btn:active { background: var(--primary); color: var(--white); border-color: var(--primary); }
+.cal-wd { display: grid; grid-template-columns: repeat(7,1fr); margin-bottom: .4rem; }
+.cal-wd div {
+  text-align: center; font-size: .58rem; font-weight: 700;
+  color: var(--ink-30); text-transform: uppercase; letter-spacing: .08em; padding: .35rem 0;
+}
+.cal-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 4px; }
+.cal-cell {
+  aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+  border-radius: 12px; font-size: .92rem; cursor: pointer;
+  border: 1px solid transparent; position: relative;
+  -webkit-tap-highlight-color: transparent; color: var(--ink);
+  transition: background .15s;
+}
+.cal-cell.empty  { cursor: default; }
+.cal-cell.past   { color: var(--ink-30); cursor: default; }
+.cal-cell.today  { border-color: var(--primary); color: var(--primary); font-weight: 700; }
+.cal-cell.has-dot::after {
+  content: ''; position: absolute; bottom: 3px;
+  width: 4px; height: 4px; background: var(--accent); border-radius: 50%;
+}
+.cal-cell.selected { background: var(--primary); color: var(--white); border-color: var(--primary); }
+.cal-cell.selected::after { background: var(--white); }
+.cal-cell:not(.empty):not(.past):not(.selected):active { background: var(--surface-deep); }
+.cal-hint    { text-align: center; padding: 2.5rem 1rem; color: var(--ink-30); font-size: .88rem; font-style: italic; }
+.cal-no-items { text-align: center; padding: 1.5rem; color: var(--ink-30); font-size: .88rem; font-style: italic; }
+
+/* ════ DETAIL AS MODAL (bottom sheet) ════ */
+.modal-backdrop {
+  position: fixed; inset: 0; z-index: 900;
+  background: rgba(15,13,11,.42);
+  opacity: 0; visibility: hidden;
+  transition: opacity .35s var(--ease), visibility .35s var(--ease);
+  -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px);
+}
+.modal-backdrop.open { opacity: 1; visibility: visible; }
+
+.modal-sheet {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 901;
+  height: 94dvh; max-height: 94dvh;
+  background: var(--surface);
+  border-radius: 28px 28px 0 0;
+  box-shadow: 0 -20px 60px -20px rgba(15,13,11,.4);
+  display: flex; flex-direction: column;
+  transform: translateY(100%);
+  transition: transform .42s var(--ease);
+  overflow: hidden;
+  touch-action: none;
+}
+.modal-sheet.open { transform: translateY(0); }
+.modal-sheet.dragging { transition: none; }
+
+.sheet-grab {
+  flex-shrink: 0;
+  padding: .75rem 1rem .25rem;
+  display: flex; flex-direction: column; align-items: center;
+  cursor: grab;
+  touch-action: none;
+}
+.sheet-grab-bar {
+  width: 42px; height: 5px; border-radius: 999px;
+  background: var(--ink-30);
+}
+.sheet-head {
+  flex-shrink: 0;
+  display: flex; align-items: center; gap: .75rem;
+  padding: .35rem 1.25rem .85rem;
+  border-bottom: 1px solid var(--ink-07);
+}
+.sheet-titles { flex: 1; min-width: 0; }
+.sheet-head .topbar-name { font-size: 1.15rem; }
+.sheet-close {
+  width: 40px; height: 40px; border-radius: 50%;
+  border: 1px solid var(--ink-07); background: var(--white);
+  color: var(--ink-60); cursor: pointer; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  -webkit-tap-highlight-color: transparent;
+  transition: background .2s, transform .2s var(--ease);
+}
+.sheet-close:active { background: var(--surface-deep); transform: scale(.9); }
+.sheet-close svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+
+.detail-scroll {
+  flex: 1; overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 1.5rem 1.5rem calc(2.5rem + var(--safe-bottom));
+  touch-action: pan-y;
+}
+.d-tag { margin-bottom: 1.4rem; }
+.d-name {
+  font-family: 'Rubik', sans-serif;
+  font-size: clamp(2.2rem, 9vw, 3.2rem);
+  font-weight: 300; letter-spacing: -.04em;
+  line-height: .92; margin-bottom: .5rem;
+}
+.d-name em { font-style: italic; color: var(--primary); font-weight: 300; }
+.d-datetime {
+  font-size: .95rem; font-weight: 300;
+  color: var(--ink-60); margin-bottom: 2rem;
+}
+.d-line {
+  display: block; width: 44px; height: 2px;
+  background: var(--accent); border-radius: 999px;
+  margin: .8rem 0 1.8rem;
+}
+.d-section { margin-bottom: 1.4rem; }
+.d-section-label {
+  font-size: .6rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .18em;
+  color: var(--ink-60); margin-bottom: .65rem;
+  font-family: 'Jost', sans-serif;
+}
+.d-card {
+  background: var(--card);
+  border: 1px solid var(--ink-07);
+  border-radius: 24px; overflow: hidden;
+  transition: box-shadow .45s var(--ease);
+}
+.d-card:hover { box-shadow: 0 18px 42px -22px rgba(15,13,11,.12); }
+.d-row {
+  display: flex; align-items: center; gap: 1rem;
+  padding: 1.1rem 1.3rem;
+  border-bottom: 1px solid var(--ink-07);
+}
+.d-row:last-child { border-bottom: none; }
+.d-icon {
+  width: 42px; height: 42px;
+  background: var(--primary-pale);
+  border-radius: 13px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.d-icon svg { width: 18px; height: 18px; stroke: var(--primary); fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.d-key  { font-size: .7rem; color: var(--ink-60); margin-bottom: .12rem; letter-spacing: .03em; }
+.d-val  { font-size: .98rem; font-weight: 400; color: var(--ink); }
+.d-val a { color: var(--ink); text-decoration: none; }
+.d-val.muted { font-weight: 300; color: var(--ink-60); font-size: .9rem; line-height: 1.55; }
+
+/* contact button grid */
+.contact-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: .6rem; margin-bottom: .9rem;
+}
+.contact-grid .btn-full { font-size: .68rem; padding: 1rem 1em; letter-spacing: .1em; }
+
+.d-actions { display: flex; flex-direction: column; gap: .6rem; margin-top: 1.4rem; }
+.d-divider  { height: 1px; background: var(--ink-07); margin: .4rem 0; }
+.btn-full {
+  width: 100%; padding: 1.2rem 2em;
+  border-radius: 999px; border: none;
+  font-family: 'Jost', sans-serif;
+  font-size: .74rem; font-weight: 600;
+  letter-spacing: .14em; text-transform: uppercase;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: .55rem;
+  transition: background .45s var(--ease), box-shadow .45s var(--ease), color .2s, transform .2s var(--ease);
+  -webkit-tap-highlight-color: transparent;
+  position: relative; overflow: hidden;
+  text-decoration: none;
+}
+.btn-full svg { width: 17px; height: 17px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+.btn-full:active { transform: scale(.97); }
+.btn-full:disabled { opacity: .45; cursor: not-allowed; }
+.btn-call {
+  background: var(--primary); color: var(--white);
+  box-shadow: 0 12px 30px -10px rgba(42,82,84,.42);
+}
+.btn-wa   { background: var(--wa-bg);   color: #0f9d58; border: 1px solid rgba(37,211,102,.35); }
+.btn-imsg { background: var(--imsg-bg); color: var(--imsg); border: 1px solid rgba(10,124,255,.30); }
+.btn-tg   { background: var(--surface-deep); color: var(--primary); border: 1px solid var(--ink-07); }
+.btn-confirm {
+  background: var(--surface-deep); color: var(--primary);
+  border: 1px solid var(--primary);
+}
+.btn-undo {
+  background: var(--surface-deep); color: var(--ink-60);
+  border: 1px solid var(--ink-07);
+}
+.btn-delete {
+  background: transparent; color: var(--danger);
+  border: 1px solid rgba(185,28,28,.18);
+}
+
+.reveal {
+  opacity: 0; transform: translateY(28px);
+  transition: opacity .85s var(--ease), transform .85s var(--ease);
+}
+.reveal.visible { opacity: 1; transform: none; }
+</style>
+</head>
+<body>
+
+<!-- ══ ЭКРАН: ВХОД ══ -->
+<div class="screen active" id="screenLogin">
+  <div class="login-wrap">
+    <h2 class="login-title">Вход в <em>админку</em></h2>
+    <form id="loginForm" onsubmit="handleLogin(event)">
+      <input type="email" id="loginEmail" placeholder="Email" required autocomplete="email"/>
+      <input type="password" id="loginPass" placeholder="Пароль" required autocomplete="current-password"/>
+      <button type="submit" class="btn-full btn-call" id="loginBtn">Войти</button>
+      <p id="loginError" class="login-error"></p>
+    </form>
+  </div>
+</div>
+
+<!-- ══ ЭКРАН: СПИСОК ══ -->
+<div class="screen" id="screenList">
+  <div class="topbar">
+    <div class="topbar-row">
+      <div class="topbar-titles">
+        <div class="topbar-name">Яна <em>Самойлова</em></div>
+        <div class="topbar-sub" id="lastUpdated">
+          <span class="pulse-wrap"><span class="pulse-dot"></span>Загрузка...</span>
+        </div>
+      </div>
+      <button class="icon-btn bell-off" id="bellBtn" onclick="toggleNotifications()" aria-label="Push-уведомления" title="Push-уведомления">
+        <svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span class="bell-dot"></span>
+      </button>
+      <button class="icon-btn" onclick="doLogout()" aria-label="Выйти" title="Выйти">
+        <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </button>
+    </div>
+    <div class="tabs-wrap">
+      <div class="tabs">
+        <button class="tab-btn active" id="tabA" onclick="switchTab('upcoming')">
+          Ближайшие <span class="chip chip-new" id="chipUpcoming">0</span>
+        </button>
+        <button class="tab-btn" id="tabB" onclick="switchTab('calendar')">
+          Календарь <span class="chip chip-muted" id="chipAll">0</span>
+        </button>
+      </div>
+    </div>
+  </div>
+  <div class="scroll-area" id="listContent">
+    <div class="ptr" id="ptr">
+      <div class="ptr-inner">
+        <div class="ptr-spin" id="ptrSpin"></div>
+        <div class="ptr-txt" id="ptrTxt">Потяните</div>
+      </div>
+    </div>
+    <div class="loader"><div class="spinner"></div>Загружаем записи...</div>
+  </div>
+</div>
+
+<!-- ══ МОДАЛКА: ДЕТАЛИ ══ -->
+<div class="modal-backdrop" id="modalBackdrop" onclick="closeDetail()"></div>
+<div class="modal-sheet" id="modalSheet">
+  <div class="sheet-grab" id="sheetGrab">
+    <div class="sheet-grab-bar"></div>
+  </div>
+  <div class="sheet-head">
+    <div class="sheet-titles">
+      <div class="topbar-name" id="dTopName">Запись</div>
+      <div class="topbar-sub"  id="dTopSub"></div>
+    </div>
+    <button class="sheet-close" onclick="closeDetail()" aria-label="Закрыть">
+      <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+  <div class="detail-scroll" id="detailContent"></div>
+</div>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging-compat.js"></script>
+
+<script>
+(function () {
+  if (!firebase.apps.length) {
+    firebase.initializeApp({
+      apiKey: "AIzaSyCDMKmjn4BogKl6oswAdD7eaDTbBZRnJqk",
+      authDomain: "yana-fitness-booking.firebaseapp.com",
+      projectId: "yana-fitness-booking",
+      storageBucket: "yana-fitness-booking.firebasestorage.app",
+      messagingSenderId: "940148052282",
+      appId: "1:940148052282:web:c4d82a89e757e2301e4003"
+    });
+  }
+  const db   = firebase.firestore();
+  const auth = firebase.auth();
+
+  let allBookings = [];
+  let currentTab  = 'upcoming';
+  let calMonth    = new Date().getMonth();
+  let calYear     = new Date().getFullYear();
+  let calSelected = null;
+
+  const MO_RU  = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
+  const MO_SH  = ['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];
+  const WD_SH  = ['вс','пн','вт','ср','чт','пт','сб'];
+  const WD_FUL = ['воскресенье','понедельник','вторник','среда','четверг','пятница','суббота'];
+
+  function pad(n) { return String(n).padStart(2,'0'); }
+  function todayStr() { const t=new Date(); return `${t.getFullYear()}-${pad(t.getMonth()+1)}-${pad(t.getDate())}`; }
+  function tomorrowStr() { const d=new Date(); d.setDate(d.getDate()+1); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; }
+  function dObj(ds) { return new Date(ds+'T00:00:00'); }
+
+  function labelFor(ds) {
+    const d    = dObj(ds);
+    const base = `${d.getDate()} ${MO_SH[d.getMonth()]} (${WD_SH[d.getDay()]})`;
+    if (ds === todayStr())    return { text:'Сегодня · '+base, isToday:true  };
+    if (ds === tomorrowStr()) return { text:'Завтра · '+base,  isToday:false };
+    return { text:base, isToday:false };
+  }
+  function fullDate(ds) {
+    const d = dObj(ds);
+    return `${d.getDate()} ${MO_SH[d.getMonth()]} ${d.getFullYear()}, ${WD_FUL[d.getDay()]}`;
+  }
+
+  /* нормализация телефона для мессенджеров */
+  function digitsOf(phone) {
+    if (!phone) return '';
+    let clean = String(phone).replace(/[^\d+]/g, '');
+    if (clean.startsWith('8') && clean.length === 11) clean = '7' + clean.slice(1);
+    clean = clean.replace(/\+/g, '');
+    return clean;
+  }
+  function tgLinkOf(phone) {
+    if (!phone) return '#';
+    let raw = String(phone).trim();
+    if (raw.startsWith('@') || !/\d/.test(raw)) return `tg://resolve?domain=${raw.replace('@','')}`;
+    let clean = '+' + digitsOf(raw);
+    return `https://t.me/${clean}`;
+  }
+
+  async function loadBookings() {
+    try {
+      const snap = await db.collection('bookings').get({ source: 'server' });
+      allBookings = [];
+      snap.forEach(doc => {
+        const d = doc.data();
+        if (!d.date) return;
+        allBookings.push({ id:doc.id, ...d, dateStr:String(d.date).substring(0,10) });
+      });
+      allBookings.sort((a,b)=>((a.dateStr||'')+(a.time||'')).localeCompare((b.dateStr||'')+(b.time||'')));
+      updateChips();
+      renderTab();
+      const n = new Date();
+      document.getElementById('lastUpdated').innerHTML =
+        `<span class="pulse-wrap"><span class="pulse-dot"></span>Обновлено: ${pad(n.getHours())}:${pad(n.getMinutes())}</span>`;
+    } catch(e) {
+      console.error(e);
+      document.getElementById('lastUpdated').innerHTML = `<span style="color:var(--danger)">Не удалось обновить</span>`;
+    }
+  }
+
+  function updateChips() {
+    const today    = todayStr();
+    const upcoming = allBookings.filter(b => b.dateStr >= today);
+    const newCount = upcoming.filter(b => b.status === 'new').length;
+    const cu = document.getElementById('chipUpcoming');
+    cu.textContent = upcoming.length;
+    cu.className   = 'chip ' + (newCount > 0 ? 'chip-new' : 'chip-done');
+    document.getElementById('chipAll').textContent = allBookings.length;
+  }
+
+  window.switchTab = function(tab) {
+    currentTab = tab;
+    document.getElementById('tabA').className = 'tab-btn'+(tab==='upcoming'?' active':'');
+    document.getElementById('tabB').className = 'tab-btn'+(tab==='calendar'?' active':'');
+    renderTab();
+  };
+  function renderTab() { currentTab==='upcoming' ? renderUpcoming() : renderCalendar(); }
+
+  /* ставит контент рядом с индикатором pull-to-refresh, не затирая его */
+  function setContent(html) {
+    const el  = document.getElementById('listContent');
+    const ptr = document.getElementById('ptr');
+    el.innerHTML = '';
+    if (ptr) el.appendChild(ptr);
+    const holder = document.createElement('div');
+    holder.innerHTML = html;
+    while (holder.firstChild) el.appendChild(holder.firstChild);
+    return el;
+  }
+
+  function renderUpcoming() {
+    const today    = todayStr();
+    const upcoming = allBookings.filter(b => b.dateStr >= today);
+    if (!upcoming.length) {
+      const el = setContent(`<div class="empty-state"><div class="empty-icon">🗓</div><div class="empty-text">Нет предстоящих записей</div></div>`);
+      return;
+    }
+    const newC  = upcoming.filter(b => b.status==='new').length;
+    const confC = upcoming.filter(b => b.status==='confirmed').length;
+    let html = `
+      <div class="section-header">
+        <span class="section-num">01 —</span>
+        <div><h2 class="section-title">Ближайшие <em>записи</em></h2><span class="section-line"></span></div>
+      </div>
+      <div class="stats-row">
+        <div class="stat-card reveal"><div class="stat-num">${upcoming.length}</div><div class="stat-lbl">Записей</div></div>
+        <div class="stat-card reveal"><div class="stat-num c-new">${newC}</div><div class="stat-lbl">Новых</div></div>
+        <div class="stat-card reveal"><div class="stat-num c-primary">${confC}</div><div class="stat-lbl">Готово</div></div>
+      </div>`;
+    const byDate = {};
+    upcoming.forEach(b => { if (!byDate[b.dateStr]) byDate[b.dateStr]=[]; byDate[b.dateStr].push(b); });
+    Object.keys(byDate).sort().forEach(ds => {
+      const { text, isToday } = labelFor(ds);
+      html += `<div class="date-group reveal"><div class="date-lbl ${isToday?'is-today':''}">${text}</div>${byDate[ds].map(cardHTML).join('')}</div>`;
+    });
+    const el = setContent(html);
+    animateReveal(el);
+  }
+
+  function renderCalendar() {
+    const byDate = {};
+    allBookings.forEach(b => { if (!byDate[b.dateStr]) byDate[b.dateStr]=[]; byDate[b.dateStr].push(b); });
+    const first = new Date(calYear, calMonth, 1);
+    const last  = new Date(calYear, calMonth+1, 0);
+    const pad0  = (first.getDay()+6)%7;
+    const today = todayStr();
+    let cells = '';
+    for (let i=0; i<pad0; i++) cells += `<div class="cal-cell empty"></div>`;
+    for (let d=1; d<=last.getDate(); d++) {
+      const ds  = `${calYear}-${pad(calMonth+1)}-${pad(d)}`;
+      const has = !!byDate[ds];
+      const isp = ds < today;
+      const idt = ds === today;
+      const isl = ds === calSelected;
+      let c = 'cal-cell';
+      if (isp) c += ' past';
+      if (idt) c += ' today';
+      if (has) c += ' has-dot';
+      if (isl) c += ' selected';
+      cells += `<div class="${c}" onclick="calPick('${ds}')">${d}</div>`;
+    }
+    let daySection = calSelected
+      ? (() => {
+          const list = (byDate[calSelected]||[]).sort((a,b)=>(a.time||'').localeCompare(b.time||''));
+          if (!list.length) return `<div class="cal-no-items">Нет записей в этот день</div>`;
+          const { text, isToday } = labelFor(calSelected);
+          return `<div class="date-group"><div class="date-lbl ${isToday?'is-today':''}">${text}</div>${list.map(cardHTML).join('')}</div>`;
+        })()
+      : `<div class="cal-hint">Выберите дату — увидите записи</div>`;
+    const html = `
+      <div class="section-header"><span class="section-num">02 —</span><div><h2 class="section-title">Все <em>даты</em></h2><span class="section-line"></span></div></div>
+      <div class="cal-wrap reveal">
+        <div class="cal-nav">
+          <button class="cal-nav-btn" onclick="calMove(-1)">←</button>
+          <span class="cal-month">${MO_RU[calMonth]} ${calYear}</span>
+          <button class="cal-nav-btn" onclick="calMove(1)">→</button>
+        </div>
+        <div class="cal-wd"><div>Пн</div><div>Вт</div><div>Ср</div><div>Чт</div><div>Пт</div><div>Сб</div><div style="color:var(--primary)">Вс</div></div>
+        <div class="cal-grid">${cells}</div>
+      </div>${daySection}`;
+    const el = setContent(html);
+    animateReveal(el);
+  }
+
+  window.calMove = function(dir) {
+    calMonth += dir;
+    if (calMonth<0)  { calMonth=11; calYear--; }
+    if (calMonth>11) { calMonth=0;  calYear++; }
+    calSelected = null;
+    renderCalendar();
+  };
+  window.calPick = function(ds) { calSelected=ds; renderCalendar(); };
+
+  function cardHTML(b) {
+    const isNew = b.status !== 'confirmed';
+    const cls   = isNew ? 'is-new' : 'is-done';
+    const badge = isNew ? 'Новая'  : 'Готово';
+    const iconPath = isNew
+      ? `<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>`
+      : `<polyline points="20 6 9 17 4 12"/>`;
+    const cmt = b.comment && b.comment!=='—' ? `<div class="bcard-comment">${b.comment}</div>` : '';
+    return `<div class="bcard ${cls}" onclick="openDetail('${b.id}')">
+      <div class="bcard-icon"><svg viewBox="0 0 24 24">${iconPath}</svg></div>
+      <div class="bcard-body">
+        <div class="bcard-top"><span class="bcard-name">${b.name||'Без имени'}</span><span class="bcard-time">${b.time||'--:--'}</span></div>
+        <div class="bcard-meta"><span class="bcard-phone">${b.phone||'—'}</span><span class="bcard-badge ${cls}">${badge}</span></div>
+        ${cmt}
+      </div>
+      <svg class="bcard-chevron" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+    </div>`;
+  }
+
+  window.openDetail = function(id) {
+    const b = allBookings.find(x=>x.id===id);
+    if (!b) return;
+    renderDetail(b);
+    openModal();
+  };
+
+  function renderDetail(b) {
+    const isNew = b.status !== 'confirmed';
+    const parts = (b.name||'Без имени').trim().split(' ');
+    document.getElementById('dTopName').innerHTML = parts.length > 1 ? `${parts[0]} <em>${parts.slice(1).join(' ')}</em>` : b.name||'Запись';
+    document.getElementById('dTopSub').textContent = `${b.dateStr?fullDate(b.dateStr):''} · ${b.time||'--:--'}`;
+    const first = parts[0];
+    const rest  = parts.slice(1).join(' ');
+    const commentRow = b.comment && b.comment!=='—' ? `
+      <div class="d-row">
+        <div class="d-icon"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+        <div><div class="d-key">Комментарий</div><div class="d-val muted">${b.comment}</div></div>
+      </div>` : '';
+
+    /* нативные ссылки на мессенджеры (открывают приложения на телефоне) */
+    const tel   = b.phone ? `tel:${digitsOf(b.phone) ? '+'+digitsOf(b.phone) : b.phone}` : '#';
+    const waN   = digitsOf(b.phone);
+    const waLink   = waN ? `whatsapp://send?phone=${waN}` : '#';      // нативное приложение WhatsApp
+    const imsgLink = waN ? `sms:+${waN}` : '#';                       // нативное приложение «Сообщения» (iMessage)
+    const tgLink   = tgLinkOf(b.phone);                              // нативное приложение Telegram
+
+    const actionBtn = isNew
+      ? `<button class="btn-full btn-confirm" onclick="doStatus('${b.id}','confirmed')"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Подтвердить запись</button>`
+      : `<button class="btn-full btn-undo" onclick="doStatus('${b.id}','new')"><svg viewBox="0 0 24 24"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/></svg>Вернуть в новые</button>`;
+
+    const contactButtons = `
+      <a href="${tel}" class="btn-full btn-call"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 1.07h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 8.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>Позвонить</a>
+      <div class="contact-grid">
+        <a href="${waLink}" class="btn-full btn-wa"><svg viewBox="0 0 24 24" style="stroke:none; fill:currentColor; width:18px; height:18px;"><path d="M12.04 2c-5.5 0-9.96 4.46-9.96 9.96 0 1.76.46 3.45 1.33 4.95L2 22l5.25-1.38c1.45.79 3.08 1.21 4.79 1.21 5.5 0 9.96-4.46 9.96-9.96S17.54 2 12.04 2zm5.8 14.06c-.24.68-1.4 1.3-1.94 1.38-.5.07-1.12.1-1.81-.11-.42-.13-.95-.31-1.64-.6-2.88-1.24-4.76-4.14-4.9-4.33-.14-.19-1.17-1.56-1.17-2.97 0-1.41.74-2.11 1-2.4.26-.29.57-.36.76-.36.19 0 .38 0 .55.01.18.01.41-.07.65.49.24.57.81 1.98.88 2.12.07.14.12.31.02.5-.09.19-.14.31-.28.47-.14.16-.29.36-.42.48-.14.14-.28.29-.12.57.16.28.71 1.17 1.53 1.9 1.05.94 1.94 1.23 2.22 1.37.28.14.44.12.6-.07.16-.19.69-.81.88-1.09.19-.28.37-.23.62-.14.25.09 1.6.76 1.87.9.28.14.46.21.53.32.07.12.07.66-.17 1.34z"/></svg>WhatsApp</a>
+        <a href="${imsgLink}" class="btn-full btn-imsg"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8z"/></svg>iMessage</a>
+      </div>
+      <a href="${tgLink}" target="_blank" class="btn-full btn-tg"><svg viewBox="0 0 24 24" style="fill:currentColor; stroke:none; width:16px; height:16px;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/></svg>Telegram</a>`;
+
+    document.getElementById('detailContent').innerHTML = `
+      <div class="d-tag reveal"><span class="tag ${isNew?'new-tag':'done-tag'}">${isNew ? '⏳ Ожидает подтверждения' : '✓ Подтверждена'}</span></div>
+      <div class="d-name reveal">${first}${rest?` <em>${rest}</em>`:''}</div>
+      <span class="d-line reveal"></span>
+      <div class="d-datetime reveal">${b.dateStr?fullDate(b.dateStr):'—'} · ${b.time||'--:--'}</div>
+      <div class="d-section reveal"><div class="d-section-label">Клиент</div><div class="d-card">
+        <div class="d-row"><div class="d-icon"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><div><div class="d-key">Имя</div><div class="d-val">${b.name||'—'}</div></div></div>
+        <div class="d-row"><div class="d-icon"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 1.07h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 8.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg></div><div><div class="d-key">Телефон</div><div class="d-val"><a href="${tel}">${b.phone||'—'}</a></div></div></div>
+        ${commentRow}
+      </div></div>
+      <div class="d-section reveal"><div class="d-section-label">Связаться</div>${contactButtons}</div>
+      <div class="d-section reveal"><div class="d-section-label">Запись</div><div class="d-card">
+        <div class="d-row"><div class="d-icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div><div><div class="d-key">Дата</div><div class="d-val">${b.dateStr?fullDate(b.dateStr):'—'}</div></div></div>
+        <div class="d-row"><div class="d-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div><div class="d-key">Время</div><div class="d-val">${b.time||'—'}</div></div></div>
+      </div></div>
+      <div class="d-actions reveal">${actionBtn}
+        <div class="d-divider"></div>
+        <button class="btn-full btn-delete" onclick="doDelete('${b.id}')"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>Удалить запись</button>
+      </div>`;
+    animateReveal(document.getElementById('detailContent'));
+  }
+
+  function animateReveal(root) {
+    const obs = new IntersectionObserver(entries => {
+      entries.forEach((e,i) => {
+        if (e.isIntersecting) {
+          setTimeout(() => e.target.classList.add('visible'), i * 60);
+          obs.unobserve(e.target);
+        }
+      });
+    }, { root: root, threshold: .05 });
+    root.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+  }
+
+  window.doStatus = async function(id, status) {
+    toggleActions(true);
+    try {
+      await db.collection('bookings').doc(id).update({ status, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+      await loadBookings();
+      const updated = allBookings.find(x=>x.id===id);
+      if (updated) renderDetail(updated);
+    } catch(e) { console.error(e); alert('Ошибка. Попробуйте ещё раз.'); }
+    finally { toggleActions(false); }
+  };
+  window.doDelete = async function(id) {
+    if (!confirm('Удалить запись навсегда?')) return;
+    toggleActions(true);
+    try {
+      await db.collection('bookings').doc(id).delete();
+      await loadBookings();
+      closeDetail();
+    } catch(e) { console.error(e); alert('Ошибка удаления.'); toggleActions(false); }
+  };
+  function toggleActions(on) {
+    document.querySelectorAll('#modalSheet .btn-full').forEach(b => { if (b.tagName === 'BUTTON') b.disabled = on; });
+  }
+
+  /* ════ МОДАЛКА: открытие / закрытие / свайп вниз ════ */
+  const sheet    = document.getElementById('modalSheet');
+  const backdrop = document.getElementById('modalBackdrop');
+  const grab     = document.getElementById('sheetGrab');
+  const dscroll  = document.getElementById('detailContent');
+
+  function openModal() {
+    backdrop.classList.add('open');
+    sheet.style.transform = '';
+    requestAnimationFrame(() => sheet.classList.add('open'));
+    document.body.style.overflow = 'hidden';
+  }
+  window.closeDetail = function() {
+    sheet.classList.remove('open');
+    sheet.style.transform = '';
+    backdrop.classList.remove('open');
+    document.body.style.overflow = '';
+  };
+
+  /* свайп вниз для закрытия — с шапки/«ручки» в любом месте,
+     либо со скролла, когда он в самом верху. Не трогает свайп списка. */
+  let dragStartY = null, dragging = false, fromScrollTop = false;
+
+  function dragStart(e, allowFromScroll) {
+    const y = e.touches ? e.touches[0].clientY : e.clientY;
+    fromScrollTop = allowFromScroll ? (dscroll.scrollTop <= 0) : true;
+    if (allowFromScroll && !fromScrollTop) return;
+    dragStartY = y; dragging = true;
+    sheet.classList.add('dragging');
+  }
+  function dragMove(e) {
+    if (!dragging || dragStartY === null) return;
+    const y = e.touches ? e.touches[0].clientY : e.clientY;
+    const dy = y - dragStartY;
+    if (dy <= 0) { sheet.style.transform = ''; return; }
+    if (fromScrollTop && e.cancelable) e.preventDefault();
+    sheet.style.transform = `translateY(${dy}px)`;
+  }
+  function dragEnd() {
+    if (!dragging) return;
+    dragging = false;
+    sheet.classList.remove('dragging');
+    const m = /translateY\(([\d.]+)px\)/.exec(sheet.style.transform);
+    const dist = m ? parseFloat(m[1]) : 0;
+    if (dist > 130) { closeDetail(); }
+    else { sheet.style.transform = ''; }
+    dragStartY = null;
+  }
+
+  /* ручка/шапка — закрывает всегда */
+  grab.addEventListener('touchstart', e => dragStart(e, false), { passive: true });
+  grab.addEventListener('touchmove',  dragMove, { passive: false });
+  grab.addEventListener('touchend',   dragEnd);
+  /* область контента — закрывает только если скролл в самом верху */
+  dscroll.addEventListener('touchstart', e => dragStart(e, true), { passive: true });
+  dscroll.addEventListener('touchmove',  dragMove, { passive: false });
+  dscroll.addEventListener('touchend',   dragEnd);
+
+  /* ════ PULL-TO-REFRESH (свайп вниз обновляет список) ════ */
+  const scrollArea = document.getElementById('listContent');
+  const ptr        = document.getElementById('ptr');
+  const ptrSpin    = document.getElementById('ptrSpin');
+  const ptrTxt     = document.getElementById('ptrTxt');
+  const PTR_MAX    = 90, PTR_TRIGGER = 64;
+  let ptrStartY = null, ptrPulling = false, ptrBusy = false;
+
+  scrollArea.addEventListener('touchstart', e => {
+    if (ptrBusy) return;
+    if (scrollArea.scrollTop <= 0) { ptrStartY = e.touches[0].clientY; ptrPulling = true; }
+  }, { passive: true });
+
+  scrollArea.addEventListener('touchmove', e => {
+    if (!ptrPulling || ptrStartY === null || ptrBusy) return;
+    let dy = e.touches[0].clientY - ptrStartY;
+    if (dy <= 0) { resetPtr(); return; }
+    dy = Math.min(dy * 0.55, PTR_MAX);
+    if (e.cancelable) e.preventDefault();
+    ptr.style.height = dy + 'px';
+    ptrSpin.style.transform = `rotate(${dy * 4}deg)`;
+    ptrTxt.textContent = dy >= PTR_TRIGGER ? 'Отпустите' : 'Потяните';
+  }, { passive: false });
+
+  scrollArea.addEventListener('touchend', async () => {
+    if (!ptrPulling) return;
+    const h = parseFloat(ptr.style.height) || 0;
+    ptrPulling = false; ptrStartY = null;
+    if (h >= PTR_TRIGGER) {
+      ptrBusy = true;
+      ptr.style.height = '46px';
+      ptr.classList.add('spinning');
+      ptrTxt.textContent = 'Обновляем';
+      try { await loadBookings(); } catch(e) { console.error(e); }
+      setTimeout(() => { ptr.classList.remove('spinning'); resetPtr(); ptrBusy = false; }, 350);
+    } else { resetPtr(); }
+  });
+
+  function resetPtr() {
+    ptr.style.height = '0px';
+    ptrSpin.style.transform = '';
+    ptrTxt.textContent = 'Потяните';
+    ptrPulling = false; ptrStartY = null;
+  }
+
+  /* ════ PUSH-УВЕДОМЛЕНИЯ ════
+     Бесплатно (тариф Spark) работает «живой» режим: пока приложение открыто/в фоне
+     с активным Service Worker, новые заявки прилетают через onSnapshot и показываются
+     как системные уведомления.
+     Для НАСТОЯЩИХ фоновых push (когда приложение полностью закрыто) нужен FCM:
+     1) Firebase → Project settings → Cloud Messaging → Web Push certificates → скопируйте
+        «Key pair» и вставьте в VAPID_KEY ниже.
+     2) Разверните Cloud Function из functions/index.js (см. файл) — она шлёт push при
+        создании новой заявки. Free-квоты FCM хватает с запасом. */
+  const VAPID_KEY = 'BMJNwGNvsAmjIvzs-a6STtPHCLGz7IzZivydL_4FZc5HnIU9sfY1nb5jP1TrvVkCE9gdLRANkQUQ5GpmYzsXFSo'; // Web Push certificate (Key pair) из Firebase
+
+  const bellBtn = document.getElementById('bellBtn');
+  let swReg = null;
+  let messaging = null;
+  try { messaging = firebase.messaging(); } catch(e) { /* нет поддержки */ }
+
+  async function registerSW() {
+    if (!('serviceWorker' in navigator) || swReg) return swReg;
+    try { swReg = await navigator.serviceWorker.register('firebase-messaging-sw.js'); }
+    catch(e) { console.warn('SW не зарегистрирован', e); }
+    return swReg;
+  }
+
+  async function setupFCM() {
+    if (!messaging || !VAPID_KEY) return;            // без VAPID_KEY работает только «живой» режим
+    try {
+      await registerSW();
+      const token = await messaging.getToken({ vapidKey: VAPID_KEY, serviceWorkerRegistration: swReg });
+      if (token && auth.currentUser) {
+        await db.collection('adminTokens').doc(token).set({
+          token, uid: auth.currentUser.uid,
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true });
+      }
+      messaging.onMessage(payload => {
+        const n = payload.notification || {};
+        showLocalNotif(n.title || 'Новая заявка', n.body || '');
+      });
+    } catch(e) { console.warn('FCM token error', e); }
+  }
+
+  /* показать уведомление: через SW (надёжнее на iOS PWA) или напрямую */
+  function showLocalNotif(title, body) {
+    if (!('Notification' in window) || Notification.permission !== 'granted') return;
+    if (swReg && swReg.active) {
+      swReg.active.postMessage({ type: 'notify', title, body });
+    } else if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+      navigator.serviceWorker.controller.postMessage({ type: 'notify', title, body });
+    } else {
+      try { new Notification(title, { body }); } catch(e) {}
+    }
+  }
+
+  function refreshBell() {
+    if (!('Notification' in window)) { bellBtn.style.display = 'none'; return; }
+    if (Notification.permission === 'granted') {
+      bellBtn.classList.add('bell-on'); bellBtn.classList.remove('bell-off');
+      bellBtn.title = 'Уведомления включены';
+    } else {
+      bellBtn.classList.remove('bell-on'); bellBtn.classList.add('bell-off');
+      bellBtn.title = 'Включить push-уведомления';
+    }
+  }
+  window.toggleNotifications = async function() {
+    if (!('Notification' in window)) { alert('Уведомления не поддерживаются на этом устройстве.'); return; }
+    if (Notification.permission === 'denied') {
+      alert('Уведомления отключены в настройках. Включите их в Настройках телефона для этого сайта.');
+      return;
+    }
+    if (Notification.permission !== 'granted') {
+      try {
+        const res = await Notification.requestPermission();
+        if (res !== 'granted') { refreshBell(); return; }
+      } catch(e) { console.error(e); return; }
+    }
+    await registerSW();
+    await setupFCM();
+    showLocalNotif('Заявки — Яна', 'Уведомления включены ✓');
+    refreshBell();
+  };
+
+  /* ── «Живой» режим: уведомление о новых заявках без сервера ── */
+  let snapStarted = false, knownIds = null;
+  function startRealtime() {
+    if (snapStarted) return;
+    snapStarted = true;
+    db.collection('bookings').onSnapshot(snap => {
+      // первый снимок — просто запоминаем существующие заявки
+      if (knownIds === null) {
+        knownIds = new Set(); snap.forEach(d => knownIds.add(d.id)); return;
+      }
+      snap.docChanges().forEach(ch => {
+        if (ch.type === 'added' && !knownIds.has(ch.doc.id)) {
+          knownIds.add(ch.doc.id);
+          const b = ch.doc.data();
+          const when = (b.date ? String(b.date).substring(0,10) : '') + (b.time ? ' ' + b.time : '');
+          showLocalNotif('Новая заявка 📅', `${b.name || 'Клиент'} · ${when}`);
+        } else if (ch.type === 'added') {
+          knownIds.add(ch.doc.id);
+        }
+      });
+      // подхватываем изменения в список, если открыта вкладка «Ближайшие/Календарь»
+      if (document.getElementById('screenList').classList.contains('active')) loadBookings();
+    }, err => console.warn('snapshot error', err));
+  }
+
+  /* ── AUTH ── */
+  auth.onAuthStateChanged(user => {
+    if (user) {
+      showLogin(false);
+      refreshBell();
+      registerSW();
+      if ('Notification' in window && Notification.permission === 'granted') setupFCM();
+      startRealtime();
+      loadBookings();
+    } else {
+      showLogin(true);
+      closeDetail();
+    }
+  });
+
+  function showLogin(on) {
+    document.getElementById('screenLogin').classList.toggle('active', on);
+    document.getElementById('screenList').classList.toggle('active', !on);
+    window.scrollTo(0,0);
+  }
+
+  window.handleLogin = async function(e) {
+    e.preventDefault();
+    const email = document.getElementById('loginEmail').value.trim();
+    const pass  = document.getElementById('loginPass').value;
+    const errEl = document.getElementById('loginError');
+    const btn   = document.getElementById('loginBtn');
+    errEl.textContent = '';
+    btn.disabled = true;
+    btn.textContent = 'Входим...';
+    try {
+      await auth.signInWithEmailAndPassword(email, pass);
+    } catch (err) {
+      const msgs = {
+        'auth/user-not-found': 'Пользователь не найден',
+        'auth/wrong-password': 'Неверный пароль',
+        'auth/invalid-email': 'Некорректный email',
+        'auth/too-many-requests': 'Слишком много попыток. Подождите'
+      };
+      errEl.textContent = msgs[err.code] || 'Ошибка: ' + err.message;
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Войти';
+    }
+  };
+
+  window.doLogout = function() { auth.signOut(); };
+
+})();
+</script>
+</body>
+</html>
