@@ -10,7 +10,7 @@
   "theme_color": "#2a5254",
   "icons": [
     {
-      "src": "icon/logotransgreen.png",
+      "src": "icon/logo.png",
       "sizes": "192x192 512x512",
       "type": "image/png",
       "purpose": "any"
