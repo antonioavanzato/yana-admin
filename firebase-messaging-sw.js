@@ -21,8 +21,8 @@ try {
     const data = payload.data || {};
     self.registration.showNotification(n.title || 'Новая заявка', {
       body: n.body || data.body || 'Открой админку, чтобы посмотреть',
-      icon: './manifest.json',
-      badge: './manifest.json',
+      icon: './icon/logo.png',
+      badge: './icon/logo.png',
       tag: 'booking',
       renotify: true,
       data: { url: './' }
