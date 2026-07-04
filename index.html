@@ -707,10 +707,20 @@ body {
     const today    = todayStr();
     const upcoming = allBookings.filter(b => b.dateStr >= today);
     const newCount = upcoming.filter(b => b.status === 'new').length;
+    
     const cu = document.getElementById('chipUpcoming');
     cu.textContent = upcoming.length;
     cu.className   = 'chip ' + (newCount > 0 ? 'chip-new' : 'chip-done');
     document.getElementById('chipAll').textContent = allBookings.length;
+
+    // --- УПРАВЛЕНИЕ КРАСНЫМ БЕЙДЖЕМ НА ИКОНКЕ И АЙФОНА ---
+    if (navigator.setAppBadge) {
+      if (newCount > 0) {
+        navigator.setAppBadge(newCount).catch(e => console.warn('Badge err:', e));
+      } else {
+        navigator.clearAppBadge().catch(e => console.warn('Badge clear err:', e));
+      }
+    }
   }
 
   window.switchTab = function(tab) {
