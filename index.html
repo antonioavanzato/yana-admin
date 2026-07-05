@@ -764,6 +764,11 @@ input:checked + .slider:before { transform: translateX(22px); }
   const db   = firebase.firestore();
   const auth = firebase.auth();
 
+  // ДОБАВИТЬ ЭТО: Защита от зависания WebSocket на iOS
+  try { 
+    db.settings({ experimentalAutoDetectLongPolling: true, merge: true }); 
+  } catch (e) {}
+
   let allBookings = [];
   let weeklySchedule = null;
   let currentTab  = 'upcoming';
@@ -1401,14 +1406,18 @@ input:checked + .slider:before { transform: translateX(22px); }
     refreshBell();
   };
 
-  let snapStarted = false, knownIds = null;
+    let snapStarted = false, knownIds = null;
   function startRealtime() {
     if (snapStarted) return;
     snapStarted = true;
+    
     db.collection('bookings').onSnapshot(snap => {
       if (knownIds === null) {
-        knownIds = new Set(); snap.forEach(d => knownIds.add(d.id)); return;
+        knownIds = new Set(); 
+        snap.forEach(d => knownIds.add(d.id)); 
+        return;
       }
+      
       snap.docChanges().forEach(ch => {
         if (ch.type === 'added' && !knownIds.has(ch.doc.id)) {
           knownIds.add(ch.doc.id);
@@ -1419,7 +1428,24 @@ input:checked + .slider:before { transform: translateX(22px); }
           knownIds.add(ch.doc.id);
         }
       });
-      if (document.getElementById('screenList').classList.contains('active')) loadBookings();
+
+      if (document.getElementById('screenList').classList.contains('active')) {
+        allBookings = [];
+        snap.forEach(doc => {
+          const d = doc.data();
+          if (!d.date) return;
+          allBookings.push({ id:doc.id, ...d, dateStr:String(d.date).substring(0,10) });
+        });
+        allBookings.sort((a,b)=>((a.dateStr||'')+(a.time||'')).localeCompare((b.dateStr||'')+(b.time||'')));
+        updateChips();
+        renderTab();
+        
+        const n = new Date();
+        const dNum = n.getDate();
+        const mName = MO_SH[n.getMonth()];
+        document.getElementById('lastUpdated').innerHTML =
+          `<span class="pulse-wrap"><span class="pulse-dot"></span>${dNum} ${mName} · ${pad(n.getHours())}:${pad(n.getMinutes())}</span>`;
+      }
     }, err => console.warn('snapshot error', err));
   }
 
@@ -1514,6 +1540,14 @@ input:checked + .slider:before { transform: translateX(22px); }
     window.addEventListener('scroll', onScroll, { passive: true });
   }
 
+// Мгновенный рефреш при возврате в PWA из фона iOS
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && auth.currentUser) {
+      // При пробуждении принудительно запрашиваем свежие данные
+      loadBookings(); 
+    }
+  });
+  
 })();
 </script>
 </body>
