@@ -1277,6 +1277,8 @@ input:checked + .slider:before { transform: translateX(22px); }
     sheet.style.transform = '';
     requestAnimationFrame(() => sheet.classList.add('open'));
     document.body.style.overflow = 'hidden';
+    // Пилюля-навигация не должна оставаться скрытой при открытии карточки
+    document.getElementById('bottomNav').classList.remove('nav-hidden');
   }
   window.closeDetail = function() {
     sheet.classList.remove('open');
