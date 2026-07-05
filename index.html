@@ -132,7 +132,7 @@ body {
 }
 .icon-btn.bell-off .bell-dot { display: block; }
 
-/* ДИЗАЙН ВКЛАДОК (ПИЛЮЛИ) */
+/* НОВЫЙ ДИЗАЙН ВКЛАДОК (ПИЛЮЛИ) */
 .tabs-wrap { margin-top: 1.1rem; }
 .tabs { 
   display: flex; 
@@ -630,7 +630,7 @@ input:checked + .slider:before { transform: translateX(22px); }
   <div class="topbar">
     <div class="topbar-row">
       <div class="topbar-titles">
-        <div class="topbar-name">Яна <em>Самойлова</em></div>
+        <div class="topbar-name">Админ <em>Панель</em></div>
         <div class="topbar-sub" id="lastUpdated">
           <span class="pulse-wrap"><span class="pulse-dot"></span>Загрузка...</span>
         </div>
@@ -779,9 +779,12 @@ input:checked + .slider:before { transform: translateX(22px); }
       allBookings.sort((a,b)=>((a.dateStr||'')+(a.time||'')).localeCompare((b.dateStr||'')+(b.time||'')));
       updateChips();
       renderTab();
+      
       const n = new Date();
+      const dNum = n.getDate();
+      const mName = MO_SH[n.getMonth()];
       document.getElementById('lastUpdated').innerHTML =
-        `<span class="pulse-wrap"><span class="pulse-dot"></span>Обновлено: ${pad(n.getHours())}:${pad(n.getMinutes())}</span>`;
+        `<span class="pulse-wrap"><span class="pulse-dot"></span>Обновлено: ${dNum} ${mName} · ${pad(n.getHours())}:${pad(n.getMinutes())}</span>`;
     } catch(e) {
       console.error(e);
       document.getElementById('lastUpdated').innerHTML = `<span style="color:var(--danger)">Не удалось обновить</span>`;
@@ -837,7 +840,16 @@ input:checked + .slider:before { transform: translateX(22px); }
     const today    = todayStr();
     const upcoming = allBookings.filter(b => b.dateStr >= today);
     if (!upcoming.length) {
-      const el = setContent(`<div class="empty-state"><div class="empty-icon">🗓</div><div class="empty-text">Нет предстоящих записей</div></div>`);
+      const el = setContent(`
+        <div class="empty-state">
+          <div class="empty-icon" style="color: var(--primary); margin-bottom: 0.5rem;">
+            <svg viewBox="0 0 24 24" style="width: 44px; height: 44px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; display: inline-block;">
+              <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+          </div>
+          <div class="empty-text">Нет предстоящих записей</div>
+        </div>
+      `);
       return;
     }
     const newC  = upcoming.filter(b => b.status==='new').length;
