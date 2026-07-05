@@ -56,7 +56,6 @@ body {
 .screen { display: none; flex-direction: column; min-height: 100dvh; }
 .screen.active { display: flex; }
 
-/* LOGIN */
 .login-wrap {
   flex: 1; display: flex; flex-direction: column;
   align-items: center; justify-content: center;
@@ -86,7 +85,6 @@ body {
 #loginForm .btn-full { margin-top: .35rem; }
 .login-error { color: var(--danger); font-size: .85rem; margin-top: .5rem; min-height: 1.2rem; }
 
-/* ВЕРХНЯЯ ПАНЕЛЬ */
 .topbar {
   position: sticky; top: 0; z-index: 200;
   background: var(--surface);
@@ -118,7 +116,6 @@ body {
 .icon-btn:active { background: var(--surface-deep); transform: scale(.91); }
 .icon-btn svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 
-/* НОВАЯ ПИЛЮЛЯ С ДАТОЙ (СИММЕТРИЧНАЯ С ВЫСОТОЙ 44PX) */
 .date-pill {
   height: 44px;
   padding: 0 1.1rem;
@@ -142,7 +139,6 @@ body {
   transform: scale(.93);
 }
 
-/* Колокольчик в активном состоянии */
 .icon-btn.bell-on { color: var(--primary); border-color: var(--primary); background: var(--done-bg); }
 .icon-btn.bell-on svg { fill: var(--primary); }
 .bell-dot {
@@ -153,7 +149,6 @@ body {
 }
 .icon-btn.bell-off .bell-dot { display: block; }
 
-/* ЗЕЛЕНАЯ ПУЛЬСИРУЮЩАЯ ТОЧКА */
 .pulse-wrap { display: inline-flex; align-items: center; gap: .45em; }
 .pulse-dot { 
   width: 8px; height: 8px; border-radius: 50%; background: #22c55e; position: relative; flex-shrink: 0; 
@@ -167,7 +162,6 @@ body {
 @keyframes pulse-ring { 0% { transform: scale(1); opacity: .6; } 100% { transform: scale(1.6); opacity: 0; } }
 @keyframes rotate { to { transform: rotate(360deg); } }
 
-/* ПАДДИНГ ДЛЯ КОНТЕНТА ИЗ-ЗА ПАРИРУЮЩЕЙ ПАНЕЛИ СНИЗУ */
 .scroll-area {
   flex: 1; overflow-y: auto;
   -webkit-overflow-scrolling: touch;
@@ -175,7 +169,6 @@ body {
   position: relative;
 }
 
-/* FLOATING ПАНЕЛЬ-ПИЛЮЛЯ "LIQUID GLASS" (iOS STYLE) */
 .bottom-nav {
   position: fixed;
   bottom: calc(1rem + var(--safe-bottom));
@@ -199,7 +192,6 @@ body {
   transition: transform .6s var(--ease-out), opacity .55s ease;
   will-change: transform, opacity;
 }
-/* Состояние скрытия при прокрутке вниз */
 .bottom-nav.nav-hidden {
   transform: translate(-50%, 100px) scale(0.92);
   opacity: 0;
@@ -232,7 +224,6 @@ body {
   letter-spacing: .02em;
   text-transform: uppercase;
 }
-/* Активное состояние кнопки в панели */
 .nav-item.active { color: var(--primary); }
 .nav-item.active svg { transform: translateY(-1px) scale(1.08); stroke-width: 2.3; }
 
@@ -394,7 +385,6 @@ body {
 }
 .cal-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 4px; }
 
-/* ОБНОВЛЕННЫЕ ТОЧКИ СТАТУСОВ НА КАЛЕНДАРЕ */
 .cal-cell {
   aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
   border-radius: 12px; font-size: .92rem; cursor: pointer;
@@ -421,7 +411,6 @@ body {
 .cal-hint    { text-align: center; padding: 2.5rem 1rem; color: var(--ink-30); font-size: .88rem; font-style: italic; }
 .cal-no-items { text-align: center; padding: 1.5rem; color: var(--ink-30); font-size: .88rem; font-style: italic; }
 
-/* ДЕТАЛИ ЗАПИСИ (BOTTOM SHEET) */
 .modal-backdrop {
   position: fixed; inset: 0; z-index: 900;
   background: rgba(15,13,11,.42);
@@ -532,7 +521,6 @@ body {
 .d-val a { color: var(--ink); text-decoration: none; }
 .d-val.muted { font-weight: 300; color: var(--ink-60); font-size: .9rem; line-height: 1.55; }
 
-/* contact button grid */
 .contact-grid {
   display: grid; grid-template-columns: 1fr 1fr;
   gap: .6rem; margin-bottom: .9rem;
@@ -589,7 +577,6 @@ body {
 }
 .reveal.visible { opacity: 1; transform: none; }
 
-/* СТИЛИ ДЛЯ НАСТРОЙКИ ГРАФИКА */
 .sched-day-card {
   background: var(--card);
   border: 1px solid var(--ink-07);
@@ -636,7 +623,6 @@ body {
 }
 .btn-save-sched { margin-top: 1.5rem; }
 
-/* Тумблер Switch */
 .switch {
   position: relative;
   display: inline-block;
@@ -665,7 +651,6 @@ input:checked + .slider:before { transform: translateX(22px); }
 </head>
 <body>
 
-<!-- ══ ЭКРАН: ВХОД ══ -->
 <div class="screen active" id="screenLogin">
   <div class="login-wrap">
     <h2 class="login-title">Вход в <em>админку</em></h2>
@@ -678,7 +663,6 @@ input:checked + .slider:before { transform: translateX(22px); }
   </div>
 </div>
 
-<!-- ══ ЭКРАН: СПИСОК ══ -->
 <div class="screen" id="screenList">
   <div class="topbar">
     <div class="topbar-row">
@@ -689,7 +673,6 @@ input:checked + .slider:before { transform: translateX(22px); }
         </div>
       </div>
       
-      <!-- Пилюля с текущей реальной датой, открывающая штатный календарь iOS -->
       <button class="date-pill" onclick="openNativeCalendar()" id="topbarDatePill">
         --.--
       </button>
@@ -708,7 +691,6 @@ input:checked + .slider:before { transform: translateX(22px); }
     <div class="loader"><div class="spinner"></div>Загружаем записи...</div>
   </div>
 
-  <!-- FLOATING BOTTOM NAVIGATION BAR (LIQUID GLASS) -->
   <nav class="bottom-nav" id="bottomNav">
     <button class="nav-item active" id="btnNavA" onclick="switchTab('upcoming')">
       <svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
@@ -725,7 +707,6 @@ input:checked + .slider:before { transform: translateX(22px); }
   </nav>
 </div>
 
-<!-- ══ МОДАЛКА: ДЕТАЛИ ══ -->
 <div class="modal-backdrop" id="modalBackdrop" onclick="closeDetail()"></div>
 <div class="modal-sheet" id="modalSheet">
   <div class="sheet-grab" id="sheetGrab">
@@ -743,7 +724,6 @@ input:checked + .slider:before { transform: translateX(22px); }
   <div class="detail-scroll" id="detailContent"></div>
 </div>
 
-<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
@@ -764,7 +744,6 @@ input:checked + .slider:before { transform: translateX(22px); }
   const db   = firebase.firestore();
   const auth = firebase.auth();
 
-  // ДОБАВИТЬ ЭТО: Защита от зависания WebSocket на iOS
   try { 
     db.settings({ experimentalAutoDetectLongPolling: true, merge: true }); 
   } catch (e) {}
@@ -801,7 +780,6 @@ input:checked + .slider:before { transform: translateX(22px); }
     return `${d.getDate()} ${MO_SH[d.getMonth()]} ${d.getFullYear()}, ${WD_FUL[d.getDay()]}`;
   }
 
-  /* нормализация телефона для мессенджеров */
   function digitsOf(phone) {
     if (!phone) return '';
     let clean = String(phone).replace(/[^\d+]/g, '');
@@ -817,12 +795,10 @@ input:checked + .slider:before { transform: translateX(22px); }
     return `https://t.me/${clean}`;
   }
 
-  // Запуск нативного календаря iOS по клику на пилюлю даты
   window.openNativeCalendar = function() {
     window.location.href = "calshow://";
   };
 
-  // Обновление цифр на пилюле текущей даты
   function updateTopbarDate() {
     const n = new Date();
     const day = pad(n.getDate());
@@ -835,7 +811,6 @@ input:checked + .slider:before { transform: translateX(22px); }
 
   async function loadBookings() {
     try {
-      // 1. Загрузка настроек расписания (безопасный режим)
       try {
         const schedDoc = await db.collection('settings').doc('schedule').get();
         if (schedDoc.exists) {
@@ -857,7 +832,6 @@ input:checked + .slider:before { transform: translateX(22px); }
         };
       }
 
-      // 2. Загрузка записей
       const snap = await db.collection('bookings').get({ source: 'server' });
       allBookings = [];
       snap.forEach(doc => {
@@ -886,7 +860,6 @@ input:checked + .slider:before { transform: translateX(22px); }
     const upcoming = allBookings.filter(b => b.dateStr >= today);
     const newCount = upcoming.filter(b => b.status === 'new').length;
 
-    // Свежий бейдж на иконку
     if (navigator.setAppBadge) {
       if (newCount > 0) {
         navigator.setAppBadge(newCount).catch(e => console.warn('Badge err:', e));
@@ -899,12 +872,10 @@ input:checked + .slider:before { transform: translateX(22px); }
   window.switchTab = function(tab) {
     currentTab = tab;
     
-    // Переключение активного класса в нижней плавающей панели
     document.getElementById('btnNavA').classList.toggle('active', tab === 'upcoming');
     document.getElementById('btnNavB').classList.toggle('active', tab === 'calendar');
     document.getElementById('btnNavC').classList.toggle('active', tab === 'schedule');
     
-    // При переключении вкладок принудительно возвращаем скролл наверх и показываем скрытую панель
     document.getElementById('listContent').scrollTop = 0;
     window.scrollTo(0, 0);
     lastScrollTop = 0;
@@ -1015,7 +986,6 @@ input:checked + .slider:before { transform: translateX(22px); }
     animateReveal(el);
   }
 
-  /* НАСТРОЙКА РАСПИСАНИЯ ПО ДНЯМ НЕДЕЛИ */
   function renderScheduleManager() {
     let html = `
       <div class="section-header">
@@ -1135,29 +1105,23 @@ input:checked + .slider:before { transform: translateX(22px); }
     openModal();
   };
 
-  /* Генерирует .ics файл для добавления в штатный календарь (iOS / Android) */
   window.addToCalendar = function(id) {
     const b = allBookings.find(x => x.id === id);
     if (!b) return;
 
-    // Собираем дату и время. Если времени нет, ставим 09:00 по умолчанию.
     const timeStr = (b.time && b.time.includes(':')) ? b.time : '09:00';
     const startDate = new Date(`${b.dateStr}T${timeStr}:00`);
     
-    // По умолчанию закладываем на процедуру 1 час
     const endDate = new Date(startDate.getTime() + 60 * 60 * 1000);
 
-    // Вспомогательная функция для формата дат ICS (UTC время)
     const fmt = d => {
       const pad = n => n < 10 ? '0' + n : n;
       return d.getUTCFullYear() + pad(d.getUTCMonth() + 1) + pad(d.getUTCDate()) + 'T' +
              pad(d.getUTCHours()) + pad(d.getUTCMinutes()) + pad(d.getUTCSeconds()) + 'Z';
     };
 
-    // Формируем описание (внутри ICS переносы строк обозначаются как \n)
     const desc = `Телефон: ${b.phone || '—'}\\nКомментарий: ${b.comment && b.comment !== '—' ? b.comment : 'Нет'}`;
 
-    // Структура файла iCalendar
     const icsContent = [
       'BEGIN:VCALENDAR',
       'VERSION:2.0',
@@ -1173,7 +1137,6 @@ input:checked + .slider:before { transform: translateX(22px); }
       'END:VCALENDAR'
     ].join('\r\n');
 
-    // Создаем файл и имитируем его скачивание
     const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
     const link = document.createElement('a');
     link.href = window.URL.createObjectURL(blob);
@@ -1196,12 +1159,11 @@ input:checked + .slider:before { transform: translateX(22px); }
         <div><div class="d-key">Комментарий</div><div class="d-val muted">${b.comment}</div></div>
       </div>` : '';
 
-    /* нативные ссылки на мессенджеры (открывают приложения на телефоне) */
     const tel   = b.phone ? `tel:${digitsOf(b.phone) ? '+'+digitsOf(b.phone) : b.phone}` : '#';
     const waN   = digitsOf(b.phone);
-    const waLink   = waN ? `whatsapp://send?phone=${waN}` : '#';      // нативное приложение WhatsApp
-    const imsgLink = waN ? `sms:+${waN}` : '#';                       // нативное приложение «Сообщения» (iMessage)
-    const tgLink   = tgLinkOf(b.phone);                              // нативное приложение Telegram
+    const waLink   = waN ? `whatsapp://send?phone=${waN}` : '#';
+    const imsgLink = waN ? `sms:+${waN}` : '#';
+    const tgLink   = tgLinkOf(b.phone);
 
     const actionBtn = isNew
       ? `<button class="btn-full btn-confirm" onclick="doStatus('${b.id}','confirmed')"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Подтвердить запись</button>`
@@ -1260,20 +1222,31 @@ input:checked + .slider:before { transform: translateX(22px); }
     } catch(e) { console.error(e); alert('Ошибка. Попробуйте ещё раз.'); }
     finally { toggleActions(false); }
   };
+
+  /* ═══ ИЗМЕНЕНО: удаление теперь освобождает слот в busySlots.
+     ID слота собираем из даты и времени брони — так же, как его
+     создаёт транзакция в booking.html, поэтому совпадение id
+     гарантировано независимо от того, какой id был у самой bookings. ═══ */
   window.doDelete = async function(id) {
+    const b = allBookings.find(x => x.id === id);
     if (!confirm('Удалить запись навсегда?')) return;
     toggleActions(true);
     try {
-      await db.collection('bookings').doc(id).delete();
+      const batch = db.batch();
+      batch.delete(db.collection('bookings').doc(id));
+      if (b && b.dateStr && b.time) {
+        batch.delete(db.collection('busySlots').doc(`${b.dateStr}_${b.time}`));
+      }
+      await batch.commit();
       await loadBookings();
       closeDetail();
     } catch(e) { console.error(e); alert('Ошибка удаления.'); toggleActions(false); }
   };
+
   function toggleActions(on) {
     document.querySelectorAll('#modalSheet .btn-full').forEach(b => { if (b.tagName === 'BUTTON') b.disabled = on; });
   }
 
-  /* ════ МОДАЛКА: открытие / закрытие / свайп вниз ════ */
   const sheet    = document.getElementById('modalSheet');
   const backdrop = document.getElementById('modalBackdrop');
   const grab     = document.getElementById('sheetGrab');
@@ -1284,7 +1257,6 @@ input:checked + .slider:before { transform: translateX(22px); }
     sheet.style.transform = '';
     requestAnimationFrame(() => sheet.classList.add('open'));
     document.body.style.overflow = 'hidden';
-    // При открытии карточки-модалки прячем пилюлю-навигацию
     document.getElementById('bottomNav').classList.add('nav-hidden');
   }
   window.closeDetail = function() {
@@ -1292,12 +1264,9 @@ input:checked + .slider:before { transform: translateX(22px); }
     sheet.style.transform = '';
     backdrop.classList.remove('open');
     document.body.style.overflow = '';
-    // После закрытия карточки возвращаем пилюлю-навигацию
     document.getElementById('bottomNav').classList.remove('nav-hidden');
   };
 
-  /* свайп вниз для закрытия — с шапки/«ручки» в любом месте,
-     либо со скролла, когда он в самом верху. Не трогает свайп списка. */
   let dragStartY = null, dragging = false, fromScrollTop = false;
 
   function dragStart(e, allowFromScroll) {
@@ -1326,11 +1295,9 @@ input:checked + .slider:before { transform: translateX(22px); }
     dragStartY = null;
   }
 
-  /* ручка/шапка — закрывает всегда */
   grab.addEventListener('touchstart', e => dragStart(e, false), { passive: true });
   grab.addEventListener('touchmove',  dragMove, { passive: false });
   grab.addEventListener('touchend',   dragEnd);
-  /* область контента — закрывает только если скролл в самом верху */
   dscroll.addEventListener('touchstart', e => dragStart(e, true), { passive: true });
   dscroll.addEventListener('touchmove',  dragMove, { passive: false });
   dscroll.addEventListener('touchend',   dragEnd);
@@ -1496,13 +1463,10 @@ input:checked + .slider:before { transform: translateX(22px); }
 
   window.doLogout = function() { auth.signOut(); };
 
-  // ════════ УМНЫЙ СЪЕЗД/ВЫЕЗД BOTTOM NAV ПРИ СКРОЛЛЕ ════════
   const scrollArea = document.getElementById('listContent');
   const bottomNav  = document.getElementById('bottomNav');
   let lastScrollTop = 0;
 
-  // В зависимости от раскладки скроллиться может либо внутренний контейнер,
-  // либо сам документ — берём максимальное значение, чтобы работало в обоих случаях.
   function currentScrollTop() {
     const areaTop = scrollArea ? scrollArea.scrollTop : 0;
     const docTop  = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
@@ -1510,12 +1474,10 @@ input:checked + .slider:before { transform: translateX(22px); }
   }
 
   function onScroll() {
-    // Пока открыта карточка-модалка навигацией не управляем
     if (document.getElementById('modalSheet').classList.contains('open')) return;
 
     const scrollTop = currentScrollTop();
 
-    // Если мы у самого верха, всегда показываем панель
     if (scrollTop <= 10) {
       bottomNav.classList.remove('nav-hidden');
       lastScrollTop = scrollTop;
@@ -1525,11 +1487,9 @@ input:checked + .slider:before { transform: translateX(22px); }
     const diff = scrollTop - lastScrollTop;
 
     if (diff > 12) {
-      // Листаем вниз — плавно убираем панель навигации
       bottomNav.classList.add('nav-hidden');
       lastScrollTop = scrollTop;
     } else if (diff < -12) {
-      // Листаем вверх — возвращаем панель навигации
       bottomNav.classList.remove('nav-hidden');
       lastScrollTop = scrollTop;
     }
@@ -1540,10 +1500,8 @@ input:checked + .slider:before { transform: translateX(22px); }
     window.addEventListener('scroll', onScroll, { passive: true });
   }
 
-// Мгновенный рефреш при возврате в PWA из фона iOS
   document.addEventListener('visibilitychange', () => {
     if (!document.hidden && auth.currentUser) {
-      // При пробуждении принудительно запрашиваем свежие данные
       loadBookings(); 
     }
   });
