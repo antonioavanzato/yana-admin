@@ -118,17 +118,29 @@ body {
 .icon-btn:active { background: var(--surface-deep); transform: scale(.91); }
 .icon-btn svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 
-/* ПИЛЮЛЯ С ДАТОЙ В ШАПКЕ */
+/* НОВАЯ ПИЛЮЛЯ С ДАТОЙ (СИММЕТРИЧНАЯ С ВЫСОТОЙ 44PX) */
 .date-pill {
-  height: 44px; padding: 0 1.1rem; border-radius: 22px; border: none;
-  background: var(--surface-deep); color: var(--primary);
-  font-family: 'Rubik', sans-serif; font-size: .85rem; font-weight: 600;
-  display: inline-flex; align-items: center; justify-content: center;
-  cursor: pointer; flex-shrink: 0;
+  height: 44px;
+  padding: 0 1.1rem;
+  border-radius: 22px;
+  border: none;
+  background: var(--surface-deep);
+  color: var(--primary);
+  font-family: 'Rubik', sans-serif;
+  font-size: .85rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
   transition: background .2s, transform .2s var(--ease);
   -webkit-tap-highlight-color: transparent;
 }
-.date-pill:active { background: var(--ink-07); transform: scale(.93); }
+.date-pill:active {
+  background: var(--ink-07);
+  transform: scale(.93);
+}
 
 /* Колокольчик в активном состоянии */
 .icon-btn.bell-on { color: var(--primary); border-color: var(--primary); background: var(--done-bg); }
@@ -141,8 +153,8 @@ body {
 }
 .icon-btn.bell-off .bell-dot { display: block; }
 
-/* ЗЕЛЕНАЯ СТАТУСНАЯ ТОЧКА */
-.pulse-wrap { display: inline-flex; align-items: center; gap: .5em; }
+/* ЗЕЛЕНАЯ ПУЛЬСИРУЮЩАЯ ТОЧКА */
+.pulse-wrap { display: inline-flex; align-items: center; gap: .45em; }
 .pulse-dot { 
   width: 8px; height: 8px; border-radius: 50%; background: #22c55e; position: relative; flex-shrink: 0; 
   box-shadow: 0 0 8px rgba(34, 197, 94, 0.6);
@@ -155,15 +167,15 @@ body {
 @keyframes pulse-ring { 0% { transform: scale(1); opacity: .6; } 100% { transform: scale(1.6); opacity: 0; } }
 @keyframes rotate { to { transform: rotate(360deg); } }
 
-/* ════ ПАДДИНГ ДЛЯ КОНТЕНТА ИЗ-ЗА ПАРИРУЮЩЕЙ ПАНЕЛИ СНИЗУ ════ */
+/* ПАДДИНГ ДЛЯ КОНТЕНТА ИЗ-ЗА ПАРИРУЮЩЕЙ ПАНЕЛИ СНИЗУ */
 .scroll-area {
   flex: 1; overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  padding: 1.75rem 1.5rem calc(6.5rem + var(--safe-bottom)); /* Большой паддинг снизу, чтобы контент прокручивался за панель */
+  padding: 1.75rem 1.5rem calc(6.5rem + var(--safe-bottom)); 
   position: relative;
 }
 
-/* ════ НОВАЯ FLOATING ПАНЕЛЬ-ПИЛЮЛЯ "LIQUID GLASS" (iOS STYLE) ════ */
+/* FLOATING ПАНЕЛЬ-ПИЛЮЛЯ "LIQUID GLASS" (iOS STYLE) */
 .bottom-nav {
   position: fixed;
   bottom: calc(1rem + var(--safe-bottom));
@@ -176,7 +188,7 @@ body {
   align-items: center;
   justify-content: space-around;
   padding: 0 .5rem;
-  background: rgba(255, 255, 255, 0.42); /* Сверхсильное матовое стекло */
+  background: rgba(255, 255, 255, 0.42); 
   -webkit-backdrop-filter: blur(20px) saturate(190%);
   backdrop-filter: blur(20px) saturate(190%);
   border: 1px solid rgba(255, 255, 255, 0.45);
@@ -818,11 +830,17 @@ input:checked + .slider:before { transform: translateX(22px); }
 
   async function loadBookings() {
     try {
-      // 1. Загрузка настроек расписания
-      const schedDoc = await db.collection('settings').doc('schedule').get();
-      if (schedDoc.exists) {
-        weeklySchedule = schedDoc.data();
-      } else {
+      // 1. Загрузка настроек расписания (безопасный режим)
+      try {
+        const schedDoc = await db.collection('settings').doc('schedule').get();
+        if (schedDoc.exists) {
+          weeklySchedule = schedDoc.data();
+        }
+      } catch (schedErr) {
+        console.warn("Ошибка загрузки графика, применен дефолтный шаблон:", schedErr);
+      }
+
+      if (!weeklySchedule) {
         weeklySchedule = {
           "1": ["09:00","10:00","11:00","12:00","14:00","15:00","16:00","17:00","18:00","19:00","20:00"],
           "2": ["08:00","09:00","10:00","11:00","12:00","18:00","19:00"],
@@ -888,7 +906,7 @@ input:checked + .slider:before { transform: translateX(22px); }
     
     // При переключении вкладок принудительно возвращаем скролл наверх и показываем скрытую панель
     document.getElementById('listContent').scrollTop = 0;
-    document.getElementById('listContent').style.transform = '';
+    document.getElementById('bottomNav').classList.remove('nav-hidden');
     
     renderTab();
   };
@@ -1456,19 +1474,30 @@ input:checked + .slider:before { transform: translateX(22px); }
   const bottomNav  = document.getElementById('bottomNav');
   let lastScrollTop = 0;
 
-  scrollArea.addEventListener('scroll', () => {
-    const scrollTop = scrollArea.scrollTop;
-    if (Math.abs(scrollTop - lastScrollTop) <= 10) return; // Игнорируем микро-скроллы
+  if (scrollArea && bottomNav) {
+    scrollArea.addEventListener('scroll', () => {
+      const scrollTop = scrollArea.scrollTop;
+      
+      // Если мы у самого верха, всегда показываем панель
+      if (scrollTop <= 10) {
+        bottomNav.classList.remove('nav-hidden');
+        lastScrollTop = scrollTop;
+        return;
+      }
 
-    if (scrollTop > lastScrollTop && scrollTop > 50) {
-      // Скроллим вниз — плавно убираем панель навигации
-      bottomNav.classList.add('nav-hidden');
-    } else {
-      // Скроллим вверх — возвращаем панель навигации
-      bottomNav.classList.remove('nav-hidden');
-    }
-    lastScrollTop = scrollTop;
-  }, { passive: true });
+      const diff = scrollTop - lastScrollTop;
+      
+      if (diff > 12) {
+        // Листаем вниз — плавно убираем панель навигации
+        bottomNav.classList.add('nav-hidden');
+        lastScrollTop = scrollTop;
+      } else if (diff < -12) {
+        // Листаем вверх — возвращаем панель навигации
+        bottomNav.classList.remove('nav-hidden');
+        lastScrollTop = scrollTop;
+      }
+    }, { passive: true });
+  }
 
 })();
 </script>
