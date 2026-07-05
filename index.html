@@ -21,7 +21,7 @@
   --primary-pale: #e9f3f2;
   --accent:       #c9a96e;
   --surface:      #fbfaf7;
-  --surface-deep: #f1ede7;
+  --surface-deep: #ede9e3;
   --card:         #ffffff;
   --ink:          #0f0d0b;
   --ink-60:       rgba(15,13,11,.6);
@@ -93,7 +93,7 @@ body {
   padding: calc(1.1rem + var(--safe-top)) 1.5rem 1rem;
   flex-shrink: 0;
 }
-.topbar-row { display: flex; align-items: center; gap: .85rem; }
+.topbar-row { display: flex; align-items: center; gap: .65rem; }
 .topbar-name {
   font-family: 'Rubik', sans-serif;
   font-size: 1.3rem; font-weight: 300;
@@ -103,7 +103,7 @@ body {
 .topbar-sub { font-size: .78rem; color: var(--ink-60); margin-top: .12rem; }
 .topbar-titles { flex: 1; min-width: 0; }
 .icon-btn {
-  width: 46px; height: 46px;
+  width: 44px; height: 44px;
   border-radius: 50%;
   border: 1px solid var(--ink-07);
   background: var(--white);
@@ -115,58 +115,61 @@ body {
   position: relative;
 }
 .icon-btn:active { background: var(--surface-deep); transform: scale(.91); }
-.icon-btn svg { width: 19px; height: 19px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-/* bell active state */
-.icon-btn.bell-on { color: var(--primary); border-color: var(--primary); background: var(--done-bg); }
+.icon-btn svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* Колокольчик и Кнопка Графика в активном состоянии */
+.icon-btn.bell-on, .icon-btn.active-btn { 
+  color: var(--primary); 
+  border-color: var(--primary); 
+  background: var(--done-bg); 
+}
 .icon-btn.bell-on svg { fill: var(--primary); }
 .bell-dot {
-  position: absolute; top: 9px; right: 10px;
+  position: absolute; top: 8px; right: 9px;
   width: 8px; height: 8px; border-radius: 50%;
   background: var(--new); border: 2px solid var(--white);
   display: none;
 }
 .icon-btn.bell-off .bell-dot { display: block; }
 
-.tag {
-  display: inline-block;
-  font-family: 'Jost', sans-serif;
-  font-size: .6rem; font-weight: 600;
-  letter-spacing: .18em; text-transform: uppercase;
-  padding: .55em 1.3em;
+/* НОВЫЙ ДИЗАЙН ВКЛАДОК (ПИЛЮЛИ) */
+.tabs-wrap { margin-top: 1.1rem; }
+.tabs { 
+  display: flex; 
+  gap: .3rem; 
+  background: var(--surface-deep); 
+  padding: .28rem; 
   border-radius: 999px;
-  border: 1px solid var(--primary-mid);
-  color: var(--primary);
-  background: transparent;
+  border: none;
 }
-.tag.new-tag  { border-color: var(--new);  color: var(--new);  background: var(--new-bg);  }
-.tag.done-tag { border-color: var(--done); color: var(--done); background: var(--done-bg); }
-.pulse-wrap { display: inline-flex; align-items: center; gap: .5em; }
-.pulse-dot  { width: 7px; height: 7px; border-radius: 50%; background: #4ade80; position: relative; flex-shrink: 0; }
-.pulse-dot::after {
-  content: ''; position: absolute; inset: -4px;
-  border-radius: 50%; background: rgba(74,222,128,.35);
-  animation: pulse-ring 1.8s ease-out infinite;
-}
-@keyframes pulse-ring { 0% { transform: scale(1); opacity: .6; } 100% { transform: scale(1.6); opacity: 0; } }
-@keyframes rotate { to { transform: rotate(360deg); } }
-
-.tabs-wrap { margin-top: 1rem; }
-.tabs { display: flex; gap: 1.2rem; border-bottom: 1px solid var(--ink-07); overflow-x: auto; -webkit-overflow-scrolling: touch; }
 .tab-btn {
-  flex: 0 0 auto; padding: .62rem .1rem;
-  border: none; background: transparent;
+  flex: 1; 
+  padding: .65rem 1rem;
+  border: none; 
+  background: transparent;
   font-family: 'Jost', sans-serif;
-  font-size: .95rem; font-weight: 500;
-  color: var(--ink-60); cursor: pointer;
-  border-bottom: 2px solid transparent;
-  margin-bottom: -1px;
-  display: flex; align-items: center; gap: .5rem;
-  transition: color .2s;
+  font-size: .88rem; 
+  font-weight: 500;
+  color: var(--ink-60); 
+  cursor: pointer;
+  border-radius: 999px; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  gap: .4rem;
+  transition: background .25s var(--ease), color .25s var(--ease), box-shadow .25s var(--ease);
   -webkit-tap-highlight-color: transparent;
+  margin-bottom: 0;
 }
-.tab-btn.active { color: var(--ink); border-bottom-color: var(--primary); font-weight: 600; }
+.tab-btn.active { 
+  background: var(--card); 
+  color: var(--ink); 
+  font-weight: 600; 
+  box-shadow: 0 4px 12px rgba(15,13,11,.05);
+}
+
 .chip {
-  min-width: 22px; height: 22px; padding: 0 7px;
+  min-width: 20px; height: 20px; padding: 0 6px;
   border-radius: 999px; font-size: .66rem; font-weight: 700;
   display: inline-flex; align-items: center; justify-content: center;
 }
@@ -357,7 +360,7 @@ body {
 .cal-hint    { text-align: center; padding: 2.5rem 1rem; color: var(--ink-30); font-size: .88rem; font-style: italic; }
 .cal-no-items { text-align: center; padding: 1.5rem; color: var(--ink-30); font-size: .88rem; font-style: italic; }
 
-/* ════ ДЕТАЛИ ЗАПИСИ (BOTTOM SHEET) ════ */
+/* ДЕТАЛИ ЗАПИСИ (BOTTOM SHEET) */
 .modal-backdrop {
   position: fixed; inset: 0; z-index: 900;
   background: rgba(15,13,11,.42);
@@ -619,11 +622,15 @@ input:checked + .slider:before { transform: translateX(22px); }
   <div class="topbar">
     <div class="topbar-row">
       <div class="topbar-titles">
-        <div class="topbar-name">Админ <em>Панель</em></div>
+        <div class="topbar-name">Яна <em>Самойлова</em></div>
         <div class="topbar-sub" id="lastUpdated">
           <span class="pulse-wrap"><span class="pulse-dot"></span>Загрузка...</span>
         </div>
       </div>
+      <!-- Кнопка перехода к графику -->
+      <button class="icon-btn" id="scheduleBtn" onclick="switchTab('schedule')" aria-label="Настройка графика" title="Настройка графика">
+        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      </button>
       <button class="icon-btn bell-off" id="bellBtn" onclick="toggleNotifications()" aria-label="Push-уведомления" title="Push-уведомления">
         <svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
         <span class="bell-dot"></span>
@@ -639,9 +646,6 @@ input:checked + .slider:before { transform: translateX(22px); }
         </button>
         <button class="tab-btn" id="tabB" onclick="switchTab('calendar')">
           Календарь <span class="chip chip-muted" id="chipAll">0</span>
-        </button>
-        <button class="tab-btn" id="tabC" onclick="switchTab('schedule')">
-          График <span class="chip chip-muted">⚙</span>
         </button>
       </div>
     </div>
@@ -698,7 +702,7 @@ input:checked + .slider:before { transform: translateX(22px); }
   let calSelected = null;
 
   const MO_RU  = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
-  const MO_SH  = ['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];
+  const MO_SH  = ['янв','фев','мар','апр','май','июн','июл','ввг','сен','окт','ноя','дек'];
   const WD_SH  = ['вс','пн','вт','ср','чт','пт','сб'];
   const WD_FUL = ['воскресенье','понедельник','вторник','среда','четверг','пятница','суббота'];
   const DAY_NAMES = ["Воскресенье", "Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"];
@@ -800,7 +804,10 @@ input:checked + .slider:before { transform: translateX(22px); }
     currentTab = tab;
     document.getElementById('tabA').className = 'tab-btn'+(tab==='upcoming'?' active':'');
     document.getElementById('tabB').className = 'tab-btn'+(tab==='calendar'?' active':'');
-    document.getElementById('tabC').className = 'tab-btn'+(tab==='schedule'?' active':'');
+    
+    // Подсветка кнопки графика в верхней панели
+    document.getElementById('scheduleBtn').className = 'icon-btn'+(tab==='schedule'?' active-btn':'');
+    
     renderTab();
   };
   
