@@ -127,24 +127,6 @@ body {
 }
 .icon-btn.bell-off .bell-dot { display: block; }
 
-/* PULL TO REFRESH */
-.ptr {
-  position: absolute; top: 0; left: 0; right: 0;
-  height: 0; display: flex; align-items: flex-end; justify-content: center;
-  overflow: hidden; pointer-events: none;
-  color: var(--ink-30);
-}
-.ptr-inner { padding-bottom: .55rem; display: flex; flex-direction: column; align-items: center; gap: .35rem; }
-.ptr-spin {
-  width: 22px; height: 22px;
-  border: 2px solid var(--ink-07);
-  border-top-color: var(--primary);
-  border-radius: 50%;
-  transition: transform .1s linear;
-}
-.ptr.spinning .ptr-spin { animation: rotate .7s linear infinite; border-top-color: var(--primary); }
-.ptr-txt { font-size: .62rem; text-transform: uppercase; letter-spacing: .12em; font-weight: 600; }
-
 .tag {
   display: inline-block;
   font-family: 'Jost', sans-serif;
@@ -582,55 +564,39 @@ body {
   transition: all .2s;
   user-select: none;
 }
-.sched-label input {
-  display: none;
-}
+.sched-label input { display: none; }
 .sched-label:has(input:checked) {
   background: var(--primary);
   color: var(--white);
   border-color: var(--primary);
 }
-.btn-save-sched {
-  margin-top: 1.5rem;
-}
+.btn-save-sched { margin-top: 1.5rem; }
 
-/* Переключатель Toggle (Switch) */
+/* Тумблер Switch */
 .switch {
   position: relative;
   display: inline-block;
   width: 46px;
   height: 24px;
 }
-.switch input { 
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
+.switch input { opacity: 0; width: 0; height: 0; }
 .slider {
   position: absolute;
-  cursor: pointer;
-  inset: 0;
+  cursor: pointer; inset: 0;
   background-color: var(--ink-30);
   transition: .3s var(--ease);
   border-radius: 24px;
 }
 .slider:before {
-  position: absolute;
-  content: "";
-  height: 18px;
-  width: 18px;
-  left: 3px;
-  bottom: 3px;
+  position: absolute; content: "";
+  height: 18px; width: 18px;
+  left: 3px; bottom: 3px;
   background-color: white;
   transition: .3s var(--ease);
   border-radius: 50%;
 }
-.switch input:checked + .slider {
-  background-color: var(--primary);
-}
-.switch input:checked + .slider:before {
-  transform: translateX(22px);
-}
+input:checked + .slider { background-color: var(--primary); }
+input:checked + .slider:before { transform: translateX(22px); }
 </style>
 </head>
 <body>
@@ -653,7 +619,7 @@ body {
   <div class="topbar">
     <div class="topbar-row">
       <div class="topbar-titles">
-        <div class="topbar-name">Яна <em>Самойлова</em></div>
+        <div class="topbar-name">Админ <em>Панель</em></div>
         <div class="topbar-sub" id="lastUpdated">
           <span class="pulse-wrap"><span class="pulse-dot"></span>Загрузка...</span>
         </div>
@@ -681,12 +647,6 @@ body {
     </div>
   </div>
   <div class="scroll-area" id="listContent">
-    <div class="ptr" id="ptr">
-      <div class="ptr-inner">
-        <div class="ptr-spin" id="ptrSpin"></div>
-        <div class="ptr-txt" id="ptrTxt">Потяните</div>
-      </div>
-    </div>
     <div class="loader"><div class="spinner"></div>Загружаем записи...</div>
   </div>
 </div>
@@ -731,7 +691,7 @@ body {
   const auth = firebase.auth();
 
   let allBookings = [];
-  let weeklySchedule = null; // Будет хранить текущий график из БД
+  let weeklySchedule = null;
   let currentTab  = 'upcoming';
   let calMonth    = new Date().getMonth();
   let calYear     = new Date().getFullYear();
@@ -742,7 +702,7 @@ body {
   const WD_SH  = ['вс','пн','вт','ср','чт','пт','сб'];
   const WD_FUL = ['воскресенье','понедельник','вторник','среда','четверг','пятница','суббота'];
   const DAY_NAMES = ["Воскресенье", "Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"];
-  const DAY_ORDER = [1, 2, 3, 4, 5, 6, 0]; // Понедельник -> Воскресенье
+  const DAY_ORDER = [1, 2, 3, 4, 5, 6, 0];
   const TIME_SLOTS = ["08:00", "09:00", "10:00", "11:00", "12:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00"];
 
   function pad(n) { return String(n).padStart(2,'0'); }
@@ -785,7 +745,6 @@ body {
       if (schedDoc.exists) {
         weeklySchedule = schedDoc.data();
       } else {
-        // Шаблон по умолчанию, если в БД еще ничего нет
         weeklySchedule = {
           "1": ["09:00","10:00","11:00","12:00","14:00","15:00","16:00","17:00","18:00","19:00","20:00"],
           "2": ["08:00","09:00","10:00","11:00","12:00","18:00","19:00"],
@@ -844,18 +803,16 @@ body {
     document.getElementById('tabC').className = 'tab-btn'+(tab==='schedule'?' active':'');
     renderTab();
   };
+  
   function renderTab() { 
     if (currentTab === 'upcoming') renderUpcoming();
     else if (currentTab === 'calendar') renderCalendar();
     else if (currentTab === 'schedule') renderScheduleManager();
   }
 
-  /* ставит контент рядом с индикатором pull-to-refresh, не затирая его */
   function setContent(html) {
     const el  = document.getElementById('listContent');
-    const ptr = document.getElementById('ptr');
     el.innerHTML = '';
-    if (ptr) el.appendChild(ptr);
     const holder = document.createElement('div');
     holder.innerHTML = html;
     while (holder.firstChild) el.appendChild(holder.firstChild);
@@ -1251,51 +1208,6 @@ body {
   dscroll.addEventListener('touchstart', e => dragStart(e, true), { passive: true });
   dscroll.addEventListener('touchmove',  dragMove, { passive: false });
   dscroll.addEventListener('touchend',   dragEnd);
-
-  /* ════ PULL-TO-REFRESH (свайп вниз обновляет список) ════ */
-  const scrollArea = document.getElementById('listContent');
-  const ptr        = document.getElementById('ptr');
-  const ptrSpin    = document.getElementById('ptrSpin');
-  const ptrTxt     = document.getElementById('ptrTxt');
-  const PTR_MAX    = 90, PTR_TRIGGER = 64;
-  let ptrStartY = null, ptrPulling = false, ptrBusy = false;
-
-  scrollArea.addEventListener('touchstart', e => {
-    if (ptrBusy) return;
-    if (scrollArea.scrollTop <= 0) { ptrStartY = e.touches[0].clientY; ptrPulling = true; }
-  }, { passive: true });
-
-  scrollArea.addEventListener('touchmove', e => {
-    if (!ptrPulling || ptrStartY === null || ptrBusy) return;
-    let dy = e.touches[0].clientY - ptrStartY;
-    if (dy <= 0) { resetPtr(); return; }
-    dy = Math.min(dy * 0.55, PTR_MAX);
-    if (e.cancelable) e.preventDefault();
-    ptr.style.height = dy + 'px';
-    ptrSpin.style.transform = `rotate(${dy * 4}deg)`;
-    ptrTxt.textContent = dy >= PTR_TRIGGER ? 'Отпустите' : 'Потяните';
-  }, { passive: false });
-
-  scrollArea.addEventListener('touchend', async () => {
-    if (!ptrPulling) return;
-    const h = parseFloat(ptr.style.height) || 0;
-    ptrPulling = false; ptrStartY = null;
-    if (h >= PTR_TRIGGER) {
-      ptrBusy = true;
-      ptr.style.height = '46px';
-      ptr.classList.add('spinning');
-      ptrTxt.textContent = 'Обновляем';
-      try { await loadBookings(); } catch(e) { console.error(e); }
-      setTimeout(() => { ptr.classList.remove('spinning'); resetPtr(); ptrBusy = false; }, 350);
-    } else { resetPtr(); }
-  });
-
-  function resetPtr() {
-    ptr.style.height = '0px';
-    ptrSpin.style.transform = '';
-    ptrTxt.textContent = 'Потяните';
-    ptrPulling = false; ptrStartY = null;
-  }
 
   const VAPID_KEY = 'BMJNwGNvsAmjIvzs-a6STtPHCLGz7IzZivydL_4FZc5HnIU9sfY1nb5jP1TrvVkCE9gdLRANkQUQ5GpmYzsXFSo';
 
