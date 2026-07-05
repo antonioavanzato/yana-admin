@@ -117,6 +117,26 @@ body {
 .icon-btn:active { background: var(--surface-deep); transform: scale(.91); }
 .icon-btn svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 
+/* СТИЛИ ПИЛЮЛИ С ДАТОЙ */
+.date-pill {
+  padding: .45rem .85rem;
+  border-radius: 999px;
+  border: 1px solid var(--ink-07);
+  background: var(--white);
+  color: var(--primary);
+  font-family: 'Rubik', sans-serif;
+  font-size: .85rem;
+  font-weight: 700;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background .2s, transform .2s var(--ease);
+  -webkit-tap-highlight-color: transparent;
+}
+.date-pill:active {
+  background: var(--surface-deep);
+  transform: scale(.93);
+}
+
 /* Колокольчик и Кнопка Графика в активном состоянии */
 .icon-btn.bell-on, .icon-btn.active-btn { 
   color: var(--primary); 
@@ -132,7 +152,7 @@ body {
 }
 .icon-btn.bell-off .bell-dot { display: block; }
 
-/* НОВЫЙ ДИЗАЙН ВКЛАДОК (ПИЛЮЛИ) */
+/* ДИЗАЙН ВКЛАДОК (ПИЛЮЛИ) */
 .tabs-wrap { margin-top: 1.1rem; }
 .tabs { 
   display: flex; 
@@ -635,6 +655,12 @@ input:checked + .slider:before { transform: translateX(22px); }
           <span class="pulse-wrap"><span class="pulse-dot"></span>Загрузка...</span>
         </div>
       </div>
+      
+      <!-- Пилюля с текущей реальной датой, открывающая штатный календарь iOS -->
+      <button class="date-pill" onclick="openNativeCalendar()" id="topbarDatePill">
+        --.--
+      </button>
+
       <!-- Кнопка перехода к графику -->
       <button class="icon-btn" id="scheduleBtn" onclick="switchTab('schedule')" aria-label="Настройка графика" title="Настройка графика">
         <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
@@ -750,6 +776,22 @@ input:checked + .slider:before { transform: translateX(22px); }
     return `https://t.me/${clean}`;
   }
 
+  // Запуск нативного календаря iOS по клику на пилюлю даты
+  window.openNativeCalendar = function() {
+    window.location.href = "calshow://";
+  };
+
+  // Обновление цифр на пилюле текущей даты
+  function updateTopbarDate() {
+    const n = new Date();
+    const day = pad(n.getDate());
+    const month = pad(n.getMonth() + 1);
+    const pill = document.getElementById('topbarDatePill');
+    if (pill) {
+      pill.textContent = `${day}.${month}`;
+    }
+  }
+
   async function loadBookings() {
     try {
       // 1. Загрузка настроек расписания
@@ -779,12 +821,13 @@ input:checked + .slider:before { transform: translateX(22px); }
       allBookings.sort((a,b)=>((a.dateStr||'')+(a.time||'')).localeCompare((b.dateStr||'')+(b.time||'')));
       updateChips();
       renderTab();
+      updateTopbarDate();
       
       const n = new Date();
       const dNum = n.getDate();
       const mName = MO_SH[n.getMonth()];
       document.getElementById('lastUpdated').innerHTML =
-        `<span class="pulse-wrap"><span class="pulse-dot"></span>Обновлено: ${dNum} ${mName} · ${pad(n.getHours())}:${pad(n.getMinutes())}</span>`;
+        `<span class="pulse-wrap"><span class="pulse-dot"></span>${dNum} ${mName} · ${pad(n.getHours())}:${pad(n.getMinutes())}</span>`;
     } catch(e) {
       console.error(e);
       document.getElementById('lastUpdated').innerHTML = `<span style="color:var(--danger)">Не удалось обновить</span>`;
