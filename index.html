@@ -901,6 +901,8 @@ input:checked + .slider:before { transform: translateX(22px); }
     
     // При переключении вкладок принудительно возвращаем скролл наверх и показываем скрытую панель
     document.getElementById('listContent').scrollTop = 0;
+    window.scrollTo(0, 0);
+    lastScrollTop = 0;
     document.getElementById('bottomNav').classList.remove('nav-hidden');
     
     renderTab();
@@ -1473,29 +1475,43 @@ input:checked + .slider:before { transform: translateX(22px); }
   const bottomNav  = document.getElementById('bottomNav');
   let lastScrollTop = 0;
 
-  if (scrollArea && bottomNav) {
-    scrollArea.addEventListener('scroll', () => {
-      const scrollTop = scrollArea.scrollTop;
-      
-      // Если мы у самого верха, всегда показываем панель
-      if (scrollTop <= 10) {
-        bottomNav.classList.remove('nav-hidden');
-        lastScrollTop = scrollTop;
-        return;
-      }
+  // В зависимости от раскладки скроллиться может либо внутренний контейнер,
+  // либо сам документ — берём максимальное значение, чтобы работало в обоих случаях.
+  function currentScrollTop() {
+    const areaTop = scrollArea ? scrollArea.scrollTop : 0;
+    const docTop  = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
+    return Math.max(areaTop, docTop);
+  }
 
-      const diff = scrollTop - lastScrollTop;
-      
-      if (diff > 12) {
-        // Листаем вниз — плавно убираем панель навигации
-        bottomNav.classList.add('nav-hidden');
-        lastScrollTop = scrollTop;
-      } else if (diff < -12) {
-        // Листаем вверх — возвращаем панель навигации
-        bottomNav.classList.remove('nav-hidden');
-        lastScrollTop = scrollTop;
-      }
-    }, { passive: true });
+  function onScroll() {
+    // Пока открыта карточка-модалка навигацией не управляем
+    if (document.getElementById('modalSheet').classList.contains('open')) return;
+
+    const scrollTop = currentScrollTop();
+
+    // Если мы у самого верха, всегда показываем панель
+    if (scrollTop <= 10) {
+      bottomNav.classList.remove('nav-hidden');
+      lastScrollTop = scrollTop;
+      return;
+    }
+
+    const diff = scrollTop - lastScrollTop;
+
+    if (diff > 12) {
+      // Листаем вниз — плавно убираем панель навигации
+      bottomNav.classList.add('nav-hidden');
+      lastScrollTop = scrollTop;
+    } else if (diff < -12) {
+      // Листаем вверх — возвращаем панель навигации
+      bottomNav.classList.remove('nav-hidden');
+      lastScrollTop = scrollTop;
+    }
+  }
+
+  if (bottomNav) {
+    if (scrollArea) scrollArea.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('scroll', onScroll, { passive: true });
   }
 
 })();
