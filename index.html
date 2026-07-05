@@ -117,23 +117,27 @@ body {
 .icon-btn:active { background: var(--surface-deep); transform: scale(.91); }
 .icon-btn svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 
-/* СТИЛИ ПИЛЮЛИ С ДАТОЙ */
+/* НОВАЯ ПИЛЮЛЯ С ДАТОЙ (СИММЕТРИЧНАЯ С ВЫСОТОЙ 44PX) */
 .date-pill {
-  padding: .45rem .85rem;
-  border-radius: 999px;
-  border: 1px solid var(--ink-07);
-  background: var(--white);
+  height: 44px;
+  padding: 0 1.1rem;
+  border-radius: 22px;
+  border: none;
+  background: var(--surface-deep);
   color: var(--primary);
   font-family: 'Rubik', sans-serif;
   font-size: .85rem;
-  font-weight: 700;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
   flex-shrink: 0;
   transition: background .2s, transform .2s var(--ease);
   -webkit-tap-highlight-color: transparent;
 }
 .date-pill:active {
-  background: var(--surface-deep);
+  background: var(--ink-07);
   transform: scale(.93);
 }
 
@@ -151,6 +155,20 @@ body {
   display: none;
 }
 .icon-btn.bell-off .bell-dot { display: block; }
+
+/* ЗЕЛЕНАЯ СТАТУСНАЯ ТОЧКА */
+.pulse-wrap { display: inline-flex; align-items: center; gap: .5em; }
+.pulse-dot { 
+  width: 8px; height: 8px; border-radius: 50%; background: #22c55e; position: relative; flex-shrink: 0; 
+  box-shadow: 0 0 8px rgba(34, 197, 94, 0.6);
+}
+.pulse-dot::after {
+  content: ''; position: absolute; inset: -4px;
+  border-radius: 50%; background: rgba(34, 197, 94, 0.35);
+  animation: pulse-ring 1.8s ease-out infinite;
+}
+@keyframes pulse-ring { 0% { transform: scale(1); opacity: .6; } 100% { transform: scale(1.6); opacity: 0; } }
+@keyframes rotate { to { transform: rotate(360deg); } }
 
 /* ДИЗАЙН ВКЛАДОК (ПИЛЮЛИ) */
 .tabs-wrap { margin-top: 1.1rem; }
