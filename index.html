@@ -1277,14 +1277,16 @@ input:checked + .slider:before { transform: translateX(22px); }
     sheet.style.transform = '';
     requestAnimationFrame(() => sheet.classList.add('open'));
     document.body.style.overflow = 'hidden';
-    // Пилюля-навигация не должна оставаться скрытой при открытии карточки
-    document.getElementById('bottomNav').classList.remove('nav-hidden');
+    // При открытии карточки-модалки прячем пилюлю-навигацию
+    document.getElementById('bottomNav').classList.add('nav-hidden');
   }
   window.closeDetail = function() {
     sheet.classList.remove('open');
     sheet.style.transform = '';
     backdrop.classList.remove('open');
     document.body.style.overflow = '';
+    // После закрытия карточки возвращаем пилюлю-навигацию
+    document.getElementById('bottomNav').classList.remove('nav-hidden');
   };
 
   /* свайп вниз для закрытия — с шапки/«ручки» в любом месте,
