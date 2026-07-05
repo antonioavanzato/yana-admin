@@ -54,7 +54,7 @@ self.addEventListener('message', event => {
 });
 
 /* ── Минимальный офлайн-кеш оболочки ── */
-const CACHE = 'yana-admin-v4';
+const CACHE = 'yana-admin-v5';
 self.addEventListener('install', e => { self.skipWaiting(); });
 self.addEventListener('activate', e => {
   e.waitUntil(caches.keys().then(ks => Promise.all(
