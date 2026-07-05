@@ -880,11 +880,6 @@ input:checked + .slider:before { transform: translateX(22px); }
     const today    = todayStr();
     const upcoming = allBookings.filter(b => b.dateStr >= today);
     const newCount = upcoming.filter(b => b.status === 'new').length;
-    
-    const cu = document.getElementById('chipUpcoming');
-    cu.textContent = upcoming.length;
-    cu.className   = 'chip ' + (newCount > 0 ? 'chip-new' : 'chip-done');
-    document.getElementById('chipAll').textContent = allBookings.length;
 
     // Свежий бейдж на иконку
     if (navigator.setAppBadge) {
