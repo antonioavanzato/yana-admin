@@ -809,6 +809,8 @@ input:checked + .slider:before { transform: translateX(22px); }
     }
   }
 
+  /* ═══ ИЗМЕНЕНО: при ошибке загрузки — точный код в консоль
+     + понятный экран вместо вечного спиннера + кнопка «Повторить» ═══ */
   async function loadBookings() {
     try {
       try {
@@ -850,10 +852,16 @@ input:checked + .slider:before { transform: translateX(22px); }
       document.getElementById('lastUpdated').innerHTML =
         `<span class="pulse-wrap"><span class="pulse-dot"></span>${dNum} ${mName} · ${pad(n.getHours())}:${pad(n.getMinutes())}</span>`;
     } catch(e) {
-      console.error(e);
+      console.error('loadBookings error:', e.code, e.message);
       document.getElementById('lastUpdated').innerHTML = `<span style="color:var(--danger)">Не удалось обновить</span>`;
+      document.getElementById('listContent').innerHTML = `
+        <div class="empty-state">
+          <div class="empty-text">Ошибка загрузки данных${e.code ? ' ('+e.code+')' : ''}</div>
+          <button class="btn-full btn-call" style="max-width:220px;margin-top:1rem" onclick="window.__retryLoadBookings()">Повторить</button>
+        </div>`;
     }
   }
+  window.__retryLoadBookings = loadBookings;
 
   function updateChips() {
     const today    = todayStr();
@@ -1223,10 +1231,6 @@ input:checked + .slider:before { transform: translateX(22px); }
     finally { toggleActions(false); }
   };
 
-  /* ═══ ИЗМЕНЕНО: удаление теперь освобождает слот в busySlots.
-     ID слота собираем из даты и времени брони — так же, как его
-     создаёт транзакция в booking.html, поэтому совпадение id
-     гарантировано независимо от того, какой id был у самой bookings. ═══ */
   window.doDelete = async function(id) {
     const b = allBookings.find(x => x.id === id);
     if (!confirm('Удалить запись навсегда?')) return;
