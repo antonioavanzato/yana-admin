@@ -724,29 +724,28 @@ input:checked + .slider:before { transform: translateX(22px); }
   <div class="detail-scroll" id="detailContent"></div>
 </div>
 
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging-compat.js"></script>
-
 <script>
 (function () {
-  if (!firebase.apps.length) {
-    firebase.initializeApp({
-      apiKey: "AIzaSyCDMKmjn4BogKl6oswAdD7eaDTbBZRnJqk",
-      authDomain: "yana-fitness-booking.firebaseapp.com",
-      projectId: "yana-fitness-booking",
-      storageBucket: "yana-fitness-booking.firebasestorage.app",
-      messagingSenderId: "940148052282",
-      appId: "1:940148052282:web:c4d82a89e757e2301e4003"
-    });
-  }
-  const db   = firebase.firestore();
-  const auth = firebase.auth();
+  /* Бэкенд: Yandex Cloud Function + YDB (данные в РФ, 152-ФЗ).
+     JWT передаётся в своём заголовке X-Yana-Token — Authorization занят платформой. */
+  const API_URL = 'https://functions.yandexcloud.net/d4eu5nrvljc1nhp583fm';
 
-  try { 
-    db.settings({ experimentalAutoDetectLongPolling: true, merge: true }); 
-  } catch (e) {}
+  function getToken() { return localStorage.getItem('yp_admin_token') || ''; }
+
+  async function api(action, payload) {
+    const r = await fetch(`${API_URL}?action=${action}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Yana-Token': getToken() },
+      body: JSON.stringify(payload || {})
+    });
+    if (r.status === 401) {
+      localStorage.removeItem('yp_admin_token');
+      showLogin(true);
+      throw new Error('unauthorized');
+    }
+    if (!r.ok) throw new Error('api_' + r.status);
+    return r.json();
+  }
 
   let allBookings = [];
   let weeklySchedule = null;
@@ -814,10 +813,8 @@ input:checked + .slider:before { transform: translateX(22px); }
   async function loadBookings() {
     try {
       try {
-        const schedDoc = await db.collection('settings').doc('schedule').get();
-        if (schedDoc.exists) {
-          weeklySchedule = schedDoc.data();
-        }
+        const { schedule } = await api('schedule_get');
+        if (schedule) weeklySchedule = schedule;
       } catch (schedErr) {
         console.warn("Ошибка загрузки графика, применен дефолтный шаблон:", schedErr);
       }
@@ -834,13 +831,17 @@ input:checked + .slider:before { transform: translateX(22px); }
         };
       }
 
-      const snap = await db.collection('bookings').get({ source: 'server' });
-      allBookings = [];
-      snap.forEach(doc => {
-        const d = doc.data();
-        if (!d.date) return;
-        allBookings.push({ id:doc.id, ...d, dateStr:String(d.date).substring(0,10) });
-      });
+      const { bookings } = await api('bookings');
+      const prevIds = knownIds;
+      knownIds = new Set(bookings.map(b => b.slot_id));
+      if (prevIds !== null) {
+        bookings.filter(b => !prevIds.has(b.slot_id)).forEach(b => {
+          showLocalNotif('Новая заявка 📅', `${b.name || 'Клиент'} · ${b.date || ''} ${b.time || ''}`);
+        });
+      }
+      allBookings = bookings
+        .filter(d => d.date)
+        .map(d => ({ id: d.slot_id, ...d, dateStr: String(d.date).substring(0, 10) }));
       allBookings.sort((a,b)=>((a.dateStr||'')+(a.time||'')).localeCompare((b.dateStr||'')+(b.time||'')));
       updateChips();
       renderTab();
@@ -1066,7 +1067,7 @@ input:checked + .slider:before { transform: translateX(22px); }
     });
 
     try {
-      await db.collection('settings').doc('schedule').set(newSchedule);
+      await api('schedule_set', { schedule: newSchedule });
       weeklySchedule = newSchedule;
       alert('Шаблон графика успешно обновлен и синхронизирован с сайтом записи!');
     } catch (e) {
@@ -1223,7 +1224,7 @@ input:checked + .slider:before { transform: translateX(22px); }
   window.doStatus = async function(id, status) {
     toggleActions(true);
     try {
-      await db.collection('bookings').doc(id).update({ status, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+      await api('status', { slot_id: id, status });
       await loadBookings();
       const updated = allBookings.find(x=>x.id===id);
       if (updated) renderDetail(updated);
@@ -1236,12 +1237,7 @@ input:checked + .slider:before { transform: translateX(22px); }
     if (!confirm('Удалить запись навсегда?')) return;
     toggleActions(true);
     try {
-      const batch = db.batch();
-      batch.delete(db.collection('bookings').doc(id));
-      if (b && b.dateStr && b.time) {
-        batch.delete(db.collection('busySlots').doc(`${b.dateStr}_${b.time}`));
-      }
-      await batch.commit();
+      await api('delete', { slot_id: id });
       await loadBookings();
       closeDetail();
     } catch(e) { console.error(e); alert('Ошибка удаления.'); toggleActions(false); }
@@ -1306,36 +1302,36 @@ input:checked + .slider:before { transform: translateX(22px); }
   dscroll.addEventListener('touchmove',  dragMove, { passive: false });
   dscroll.addEventListener('touchend',   dragEnd);
 
-  const VAPID_KEY = 'BMJNwGNvsAmjIvzs-a6STtPHCLGz7IzZivydL_4FZc5HnIU9sfY1nb5jP1TrvVkCE9gdLRANkQUQ5GpmYzsXFSo';
+  const VAPID_KEY = 'BFjAJdb9Dh0DFqzOg7DOMmk_R66uV7cDvCwsavNj9xqQSo1dBn8GoGEVJPkzPJA6TzoopiPfggfylUG1EvfYMA8';
+
+  function urlBase64ToUint8Array(base64String) {
+    const padding = '='.repeat((4 - base64String.length % 4) % 4);
+    const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+    const raw = atob(base64);
+    return Uint8Array.from([...raw].map(c => c.charCodeAt(0)));
+  }
 
   const bellBtn = document.getElementById('bellBtn');
   let swReg = null;
-  let messaging = null;
-  try { messaging = firebase.messaging(); } catch(e) { }
 
   async function registerSW() {
     if (!('serviceWorker' in navigator) || swReg) return swReg;
-    try { swReg = await navigator.serviceWorker.register('firebase-messaging-sw.js'); }
+    try { swReg = await navigator.serviceWorker.register('sw.js'); }
     catch(e) { console.warn('SW не зарегистрирован', e); }
     return swReg;
   }
 
-  async function setupFCM() {
-    if (!messaging || !VAPID_KEY) return;
+  async function setupPush() {
+    if (!VAPID_KEY) return;
     try {
       await registerSW();
-      const token = await messaging.getToken({ vapidKey: VAPID_KEY, serviceWorkerRegistration: swReg });
-      if (token && auth.currentUser) {
-        await db.collection('adminTokens').doc(token).set({
-          token, uid: auth.currentUser.uid,
-          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-        }, { merge: true });
-      }
-      messaging.onMessage(payload => {
-        const n = payload.notification || {};
-        showLocalNotif(n.title || 'Новая заявка', n.body || '');
+      if (!swReg || !swReg.pushManager) return;
+      const subscription = await swReg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(VAPID_KEY)
       });
-    } catch(e) { console.warn('FCM token error', e); }
+      await api('subscribe', { subscription });
+    } catch(e) { console.warn('Push subscribe error', e); }
   }
 
   function showLocalNotif(title, body) {
@@ -1372,67 +1368,30 @@ input:checked + .slider:before { transform: translateX(22px); }
       } catch(e) { console.error(e); return; }
     }
     await registerSW();
-    await setupFCM();
+    await setupPush();
     showLocalNotif('Заявки — Яна', 'Уведомления включены ✓');
     refreshBell();
   };
 
-    let snapStarted = false, knownIds = null;
+  /* Firestore onSnapshot заменён polling'ом раз в 20 секунд */
+  let pollTimer = null, knownIds = null;
   function startRealtime() {
-    if (snapStarted) return;
-    snapStarted = true;
-    
-    db.collection('bookings').onSnapshot(snap => {
-      if (knownIds === null) {
-        knownIds = new Set(); 
-        snap.forEach(d => knownIds.add(d.id)); 
-        return;
-      }
-      
-      snap.docChanges().forEach(ch => {
-        if (ch.type === 'added' && !knownIds.has(ch.doc.id)) {
-          knownIds.add(ch.doc.id);
-          const b = ch.doc.data();
-          const when = (b.date ? String(b.date).substring(0,10) : '') + (b.time ? ' ' + b.time : '');
-          showLocalNotif('Новая заявка 📅', `${b.name || 'Клиент'} · ${when}`);
-        } else if (ch.type === 'added') {
-          knownIds.add(ch.doc.id);
-        }
-      });
-
-      if (document.getElementById('screenList').classList.contains('active')) {
-        allBookings = [];
-        snap.forEach(doc => {
-          const d = doc.data();
-          if (!d.date) return;
-          allBookings.push({ id:doc.id, ...d, dateStr:String(d.date).substring(0,10) });
-        });
-        allBookings.sort((a,b)=>((a.dateStr||'')+(a.time||'')).localeCompare((b.dateStr||'')+(b.time||'')));
-        updateChips();
-        renderTab();
-        
-        const n = new Date();
-        const dNum = n.getDate();
-        const mName = MO_SH[n.getMonth()];
-        document.getElementById('lastUpdated').innerHTML =
-          `<span class="pulse-wrap"><span class="pulse-dot"></span>${dNum} ${mName} · ${pad(n.getHours())}:${pad(n.getMinutes())}</span>`;
-      }
-    }, err => console.warn('snapshot error', err));
+    if (pollTimer) return;
+    pollTimer = setInterval(() => {
+      if (!document.hidden && getToken()) loadBookings().catch(() => {});
+    }, 20000);
   }
 
-  auth.onAuthStateChanged(user => {
-    if (user) {
-      showLogin(false);
-      refreshBell();
-      registerSW();
-      if ('Notification' in window && Notification.permission === 'granted') setupFCM();
-      startRealtime();
-      loadBookings();
-    } else {
-      showLogin(true);
-      closeDetail();
-    }
-  });
+  function initAuthed() {
+    showLogin(false);
+    refreshBell();
+    registerSW();
+    if ('Notification' in window && Notification.permission === 'granted') setupPush();
+    startRealtime();
+    loadBookings();
+  }
+
+  if (getToken()) initAuthed(); else showLogin(true);
 
   function showLogin(on) {
     document.getElementById('screenLogin').classList.toggle('active', on);
@@ -1450,22 +1409,32 @@ input:checked + .slider:before { transform: translateX(22px); }
     btn.disabled = true;
     btn.textContent = 'Входим...';
     try {
-      await auth.signInWithEmailAndPassword(email, pass);
+      const r = await fetch(`${API_URL}?action=login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password: pass })
+      });
+      if (r.status === 401) throw new Error('bad_credentials');
+      if (!r.ok) throw new Error('server');
+      const { token } = await r.json();
+      localStorage.setItem('yp_admin_token', token);
+      initAuthed();
     } catch (err) {
-      const msgs = {
-        'auth/user-not-found': 'Пользователь не найден',
-        'auth/wrong-password': 'Неверный пароль',
-        'auth/invalid-email': 'Некорректный email',
-        'auth/too-many-requests': 'Слишком много попыток. Подождите'
-      };
-      errEl.textContent = msgs[err.code] || 'Ошибка: ' + err.message;
+      errEl.textContent = err.message === 'bad_credentials'
+        ? 'Неверный email или пароль'
+        : 'Ошибка соединения. Попробуйте ещё раз';
     } finally {
       btn.disabled = false;
       btn.textContent = 'Войти';
     }
   };
 
-  window.doLogout = function() { auth.signOut(); };
+  window.doLogout = function() {
+    localStorage.removeItem('yp_admin_token');
+    knownIds = null;
+    showLogin(true);
+    closeDetail();
+  };
 
   const scrollArea = document.getElementById('listContent');
   const bottomNav  = document.getElementById('bottomNav');
@@ -1505,8 +1474,8 @@ input:checked + .slider:before { transform: translateX(22px); }
   }
 
   document.addEventListener('visibilitychange', () => {
-    if (!document.hidden && auth.currentUser) {
-      loadBookings(); 
+    if (!document.hidden && getToken()) {
+      loadBookings();
     }
   });
   
