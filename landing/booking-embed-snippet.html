@@ -1,0 +1,90 @@
+<!-- ════════════════════════════════════════════════════════════════
+   YanaPro — БЛОК ОНЛАЙН-ЗАПИСИ (iframe с booking.yanapro.ru)
+   Вставить в HTML-виджет wfolio ПЕРЕД строкой  <!-- CONTACT -->
+   (т.е. между секцией LOCATION и секцией CONTACT).
+════════════════════════════════════════════════════════════════ -->
+
+<style>
+#yp-app .booking { padding: clamp(4rem,12vh,10rem) 0; background: transparent; }
+#yp-app .booking__frame-wrap {
+  border-radius: 2rem; overflow: hidden;
+  background: var(--card, #fff);
+  border: 1px solid var(--ink-07);
+  box-shadow: 0 30px 70px rgba(15,13,11,.08);
+}
+#yp-app .booking__frame-wrap iframe {
+  display: block; width: 100%; border: 0;
+  height: 1200px; /* стартовая высота до первого postMessage */
+  transition: height .35s var(--ease);
+}
+</style>
+
+<!-- BOOKING -->
+<section class="booking" id="booking" data-screen-label="Запись">
+  <div class="wrap">
+    <div class="section-header reveal reveal--left">
+      <span class="section-num">03 —</span>
+      <div>
+        <h2 class="section-title">Онлайн-<em>запись</em></h2>
+        <span class="section-line"></span>
+      </div>
+    </div>
+    <div class="booking__frame-wrap reveal reveal--scale">
+      <iframe
+        id="ypBookingFrame"
+        src="https://antonioavanzato.github.io/booking.yanapro.ru/?embed=1"
+        title="Онлайн-запись на тренировку"
+        loading="lazy"
+        scrolling="no"></iframe>
+    </div>
+  </div>
+</section>
+
+<script>
+/* Приём сообщений от формы: авто-высота iframe + прокрутка к началу
+   блока после успешной отправки заявки */
+(function(){
+  var ORIGIN = 'https://antonioavanzato.github.io';
+  function start() {
+    var frame = document.getElementById('ypBookingFrame');
+    if (!frame) return;
+    window.addEventListener('message', function (e) {
+      if (e.origin !== ORIGIN) return;
+      var d = e.data || {};
+      if (d.type === 'yp-booking-height' && d.height > 0) {
+        frame.style.height = Math.ceil(d.height) + 'px';
+      }
+      if (d.type === 'yp-booking-scroll-top') {
+        var top = document.getElementById('booking').getBoundingClientRect().top + window.pageYOffset;
+        window.scrollTo({ top: top, behavior: 'smooth' });
+      }
+    });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
+})();
+</script>
+
+<!-- ════════════════════════════════════════════════════════════════
+   КРОМЕ ВСТАВКИ БЛОКА — ДВЕ ЗАМЕНЫ В СУЩЕСТВУЮЩЕМ КОДЕ:
+
+   1) Кнопка «Записаться» в HERO. Было:
+      <a href="tg://resolve?domain=yanaeuphoria" onclick="window.location.href=this.href; return false;" class="btn-primary" data-magnetic>Записаться</a>
+      Стало:
+      <a href="#booking" class="btn-primary" data-magnetic>Записаться</a>
+
+   2) Карточка «Запись на тренировку» в секции CONTACT. Было:
+      <a class="contact-card reveal reveal--left" href="tg://resolve?domain=yanaeuphoria" onclick="window.location.href=this.href; return false;">
+      Стало:
+      <a class="contact-card reveal reveal--left" href="#booking">
+
+   Плавный скролл по якорю #booking уже обрабатывает существующий
+   скрипт главной (обработчик a[href^="#"]).
+
+   ВАЖНО: перед публикацией проверить адрес формы. В сниппете указан
+   https://antonioavanzato.github.io/booking.yanapro.ru/ — стандартный
+   URL GitHub Pages для этого репозитория. Открой его в браузере:
+   если форма открывается — всё верно; если 404 — включить Pages в
+   настройках репозитория booking.yanapro.ru (Settings → Pages →
+   Deploy from branch → main) или подставить фактический URL и
+   заменить его в ДВУХ местах сниппета: src iframe и константа ORIGIN.
+════════════════════════════════════════════════════════════════ -->
