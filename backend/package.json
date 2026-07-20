@@ -1,0 +1,11 @@
+{
+  "name": "yanapro-booking-backend",
+  "version": "1.0.0",
+  "description": "Yandex Cloud Function: бэкенд записи YanaPro (YDB, JWT, Web Push)",
+  "main": "index.js",
+  "dependencies": {
+    "ydb-sdk": "^5.9.0",
+    "jsonwebtoken": "^9.0.2",
+    "web-push": "^3.6.7"
+  }
+}
