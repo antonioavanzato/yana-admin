@@ -1377,10 +1377,17 @@ input:checked + .slider:before { transform: translateX(22px); }
   let pollTimer = null, knownIds = null;
   function startRealtime() {
     if (pollTimer) return;
+    // 60с вместо 20с: держим расход в бесплатном тарифе Yandex Cloud.
+    // Мгновенность обеспечивают push и Telegram, polling — только страховка.
     pollTimer = setInterval(() => {
       if (!document.hidden && getToken()) loadBookings().catch(() => {});
-    }, 20000);
+    }, 60000);
   }
+
+  // При возврате в админку обновляем список сразу, не дожидаясь тика таймера
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && getToken()) loadBookings().catch(() => {});
+  });
 
   function initAuthed() {
     showLogin(false);
