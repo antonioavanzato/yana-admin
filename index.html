@@ -1156,7 +1156,7 @@ input:checked + .slider:before { transform: translateX(22px); }
   };
 
   const esc = (v) => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  const jsId = (v) => esc(String(v ?? '').replace(/[^\w-]/g, ''));
+  const jsId = (v) => esc(String(v ?? '').replace(/[\\'\n\r<>]/g, c => '\\u' + c.charCodeAt(0).toString(16).padStart(4, '0')));
 
   function renderDetail(b) {
     const isNew = b.status !== 'confirmed';
