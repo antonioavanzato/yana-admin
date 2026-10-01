@@ -1095,12 +1095,12 @@ input:checked + .slider:before { transform: translateX(22px); }
     const iconPath = isNew
       ? `<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>`
       : `<polyline points="20 6 9 17 4 12"/>`;
-    const cmt = b.comment && b.comment!=='—' ? `<div class="bcard-comment">${b.comment}</div>` : '';
-    return `<div class="bcard ${cls}" onclick="openDetail('${b.id}')">
+    const cmt = b.comment && b.comment!=='—' ? `<div class="bcard-comment">${esc(b.comment)}</div>` : '';
+    return `<div class="bcard ${cls}" onclick="openDetail('${jsId(b.id)}')">
       <div class="bcard-icon"><svg viewBox="0 0 24 24">${iconPath}</svg></div>
       <div class="bcard-body">
-        <div class="bcard-top"><span class="bcard-name">${b.name||'Без имени'}</span><span class="bcard-time">${b.time||'--:--'}</span></div>
-        <div class="bcard-meta"><span class="bcard-phone">${b.phone||'—'}</span><span class="bcard-badge ${cls}">${badge}</span></div>
+        <div class="bcard-top"><span class="bcard-name">${esc(b.name||'Без имени')}</span><span class="bcard-time">${esc(b.time||'--:--')}</span></div>
+        <div class="bcard-meta"><span class="bcard-phone">${esc(b.phone||'—')}</span><span class="bcard-badge ${cls}">${badge}</span></div>
         ${cmt}
       </div>
       <svg class="bcard-chevron" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
@@ -1155,17 +1155,20 @@ input:checked + .slider:before { transform: translateX(22px); }
     document.body.removeChild(link);
   };
 
+  const esc = (v) => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const jsId = (v) => esc(String(v ?? '').replace(/[^\w-]/g, ''));
+
   function renderDetail(b) {
     const isNew = b.status !== 'confirmed';
     const parts = (b.name||'Без имени').trim().split(' ');
-    document.getElementById('dTopName').innerHTML = parts.length > 1 ? `${parts[0]} <em>${parts.slice(1).join(' ')}</em>` : b.name||'Запись';
-    document.getElementById('dTopSub').textContent = `${b.dateStr?fullDate(b.dateStr):''} · ${b.time||'--:--'}`;
+    document.getElementById('dTopName').innerHTML = parts.length > 1 ? `${esc(parts[0])} <em>${esc(parts.slice(1).join(' '))}</em>` : esc(b.name||'Запись');
+    document.getElementById('dTopSub').textContent = `${b.dateStr?fullDate(b.dateStr):''} · ${esc(b.time||'--:--')}`;
     const first = parts[0];
     const rest  = parts.slice(1).join(' ');
     const commentRow = b.comment && b.comment!=='—' ? `
       <div class="d-row">
         <div class="d-icon"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
-        <div><div class="d-key">Комментарий</div><div class="d-val muted">${b.comment}</div></div>
+        <div><div class="d-key">Комментарий</div><div class="d-val muted">${esc(b.comment)}</div></div>
       </div>` : '';
 
     const tel   = b.phone ? `tel:${digitsOf(b.phone) ? '+'+digitsOf(b.phone) : b.phone}` : '#';
@@ -1175,36 +1178,36 @@ input:checked + .slider:before { transform: translateX(22px); }
     const tgLink   = tgLinkOf(b.phone);
 
     const actionBtn = isNew
-      ? `<button class="btn-full btn-confirm" onclick="doStatus('${b.id}','confirmed')"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Подтвердить запись</button>`
-      : `<button class="btn-full btn-calendar" onclick="addToCalendar('${b.id}')"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>В календарь iOS</button>
-         <button class="btn-full btn-undo" onclick="doStatus('${b.id}','new')"><svg viewBox="0 0 24 24"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/></svg>Вернуть в новые</button>`;
+      ? `<button class="btn-full btn-confirm" onclick="doStatus('${jsId(b.id)}','confirmed')"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Подтвердить запись</button>`
+      : `<button class="btn-full btn-calendar" onclick="addToCalendar('${jsId(b.id)}')"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>В календарь iOS</button>
+         <button class="btn-full btn-undo" onclick="doStatus('${jsId(b.id)}','new')"><svg viewBox="0 0 24 24"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/></svg>Вернуть в новые</button>`;
 
     const contactButtons = `
-      <a href="${tel}" class="btn-full btn-call"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 1.07h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 8.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>Позвонить</a>
+      <a href="${esc(tel)}" class="btn-full btn-call"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 1.07h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 8.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>Позвонить</a>
       <div class="contact-grid">
-        <a href="${waLink}" class="btn-full btn-wa"><svg viewBox="0 0 24 24" style="stroke:none; fill:currentColor; width:18px; height:18px;"><path d="M12.04 2c-5.5 0-9.96 4.46-9.96 9.96 0 1.76.46 3.45 1.33 4.95L2 22l5.25-1.38c1.45.79 3.08 1.21 4.79 1.21 5.5 0 9.96-4.46 9.96-9.96S17.54 2 12.04 2zm5.8 14.06c-.24.68-1.4 1.3-1.94 1.38-.5.07-1.12.1-1.81-.11-.42-.13-.95-.31-1.64-.6-2.88-1.24-4.76-4.14-4.9-4.33-.14-.19-1.17-1.56-1.17-2.97 0-1.41.74-2.11 1-2.4.26-.29.57-.36.76-.36.19 0 .38 0 .55.01.18.01.41-.07.65.49.24.57.81 1.98.88 2.12.07.14.12.31.02.5-.09.19-.14.31-.28.47-.14.16-.29.36-.42.48-.14.14-.28.29-.12.57.16.28.71 1.17 1.53 1.9 1.05.94 1.94 1.23 2.22 1.37.28.14.44.12.6-.07.16-.19.69-.81.88-1.09.19-.28.37-.23.62-.14.25.09 1.6.76 1.87.9.28.14.46.21.53.32.07.12.07.66-.17 1.34z"/></svg>WhatsApp</a>
-        <a href="${imsgLink}" class="btn-full btn-imsg"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8z"/></svg>iMessage</a>
+        <a href="${esc(waLink)}" class="btn-full btn-wa"><svg viewBox="0 0 24 24" style="stroke:none; fill:currentColor; width:18px; height:18px;"><path d="M12.04 2c-5.5 0-9.96 4.46-9.96 9.96 0 1.76.46 3.45 1.33 4.95L2 22l5.25-1.38c1.45.79 3.08 1.21 4.79 1.21 5.5 0 9.96-4.46 9.96-9.96S17.54 2 12.04 2zm5.8 14.06c-.24.68-1.4 1.3-1.94 1.38-.5.07-1.12.1-1.81-.11-.42-.13-.95-.31-1.64-.6-2.88-1.24-4.76-4.14-4.9-4.33-.14-.19-1.17-1.56-1.17-2.97 0-1.41.74-2.11 1-2.4.26-.29.57-.36.76-.36.19 0 .38 0 .55.01.18.01.41-.07.65.49.24.57.81 1.98.88 2.12.07.14.12.31.02.5-.09.19-.14.31-.28.47-.14.16-.29.36-.42.48-.14.14-.28.29-.12.57.16.28.71 1.17 1.53 1.9 1.05.94 1.94 1.23 2.22 1.37.28.14.44.12.6-.07.16-.19.69-.81.88-1.09.19-.28.37-.23.62-.14.25.09 1.6.76 1.87.9.28.14.46.21.53.32.07.12.07.66-.17 1.34z"/></svg>WhatsApp</a>
+        <a href="${esc(imsgLink)}" class="btn-full btn-imsg"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8z"/></svg>iMessage</a>
       </div>
-      <a href="${tgLink}" target="_blank" class="btn-full btn-tg"><svg viewBox="0 0 24 24" style="fill:currentColor; stroke:none; width:16px; height:16px;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/></svg>Telegram</a>`;
+      <a href="${esc(tgLink)}" target="_blank" class="btn-full btn-tg"><svg viewBox="0 0 24 24" style="fill:currentColor; stroke:none; width:16px; height:16px;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/></svg>Telegram</a>`;
 
     document.getElementById('detailContent').innerHTML = `
       <div class="d-tag reveal"><span class="tag ${isNew?'new-tag':'done-tag'}">${isNew ? '⏳ Ожидает подтверждения' : '✓ Подтверждена'}</span></div>
-      <div class="d-name reveal">${first}${rest?` <em>${rest}</em>`:''}</div>
+      <div class="d-name reveal">${esc(first)}${rest?` <em>${esc(rest)}</em>`:''}</div>
       <span class="d-line reveal"></span>
-      <div class="d-datetime reveal">${b.dateStr?fullDate(b.dateStr):'—'} · ${b.time||'--:--'}</div>
+      <div class="d-datetime reveal">${b.dateStr?fullDate(b.dateStr):'—'} · ${esc(b.time||'--:--')}</div>
       <div class="d-section reveal"><div class="d-section-label">Клиент</div><div class="d-card">
-        <div class="d-row"><div class="d-icon"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><div><div class="d-key">Имя</div><div class="d-val">${b.name||'—'}</div></div></div>
-        <div class="d-row"><div class="d-icon"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 1.07h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 8.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg></div><div><div class="d-key">Телефон</div><div class="d-val"><a href="${tel}">${b.phone||'—'}</a></div></div></div>
+        <div class="d-row"><div class="d-icon"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><div><div class="d-key">Имя</div><div class="d-val">${esc(b.name||'—')}</div></div></div>
+        <div class="d-row"><div class="d-icon"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 1.07h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 8.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg></div><div><div class="d-key">Телефон</div><div class="d-val"><a href="${esc(tel)}">${esc(b.phone||'—')}</a></div></div></div>
         ${commentRow}
       </div></div>
       <div class="d-section reveal"><div class="d-section-label">Связаться</div>${contactButtons}</div>
       <div class="d-section reveal"><div class="d-section-label">Запись</div><div class="d-card">
         <div class="d-row"><div class="d-icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div><div><div class="d-key">Дата</div><div class="d-val">${b.dateStr?fullDate(b.dateStr):'—'}</div></div></div>
-        <div class="d-row"><div class="d-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div><div class="d-key">Время</div><div class="d-val">${b.time||'—'}</div></div></div>
+        <div class="d-row"><div class="d-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div><div class="d-key">Время</div><div class="d-val">${esc(b.time||'—')}</div></div></div>
       </div></div>
       <div class="d-actions reveal">${actionBtn}
         <div class="d-divider"></div>
-        <button class="btn-full btn-delete" onclick="doDelete('${b.id}')"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>Удалить запись</button>
+        <button class="btn-full btn-delete" onclick="doDelete('${jsId(b.id)}')"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>Удалить запись</button>
       </div>`;
     animateReveal(document.getElementById('detailContent'));
   }
