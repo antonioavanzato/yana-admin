@@ -433,6 +433,9 @@ body {
   touch-action: none;
 }
 .modal-sheet.open { transform: translateY(0); }
+.sched-status { text-align: center; font-size: .85rem; color: var(--ink-60); padding: .75rem 0 .5rem; }
+.sched-status.ok { color: var(--done); }
+.sched-status.err { color: var(--danger); cursor: pointer; text-decoration: underline; }
 .modal-sheet.dragging { transition: none; }
 
 .sheet-grab {
@@ -621,7 +624,6 @@ body {
   color: var(--white);
   border-color: var(--primary);
 }
-.btn-save-sched { margin-top: 1.5rem; }
 
 .switch {
   position: relative;
@@ -1023,7 +1025,7 @@ input:checked + .slider:before { transform: translateX(22px); }
               const checked = activeSlots.includes(time) ? 'checked' : '';
               return `
                 <label class="sched-label">
-                  <input type="checkbox" name="time-${dayIdx}" value="${time}" ${checked}>
+                  <input type="checkbox" name="time-${dayIdx}" value="${time}" ${checked} onchange="queueSchedSave()">
                   ${time}
                 </label>
               `;
@@ -1034,9 +1036,7 @@ input:checked + .slider:before { transform: translateX(22px); }
     });
 
     html += `
-      <button class="btn-full btn-call btn-save-sched" onclick="saveWeeklySchedule()" id="saveSchedBtn">
-        Сохранить график
-      </button>
+      <div class="sched-status" id="schedStatus">Изменения сохраняются автоматически</div>
     `;
 
     const el = setContent(html);
@@ -1046,36 +1046,48 @@ input:checked + .slider:before { transform: translateX(22px); }
   window.toggleDay = function(dayIdx) {
     const isChecked = document.getElementById(`toggle-${dayIdx}`).checked;
     document.getElementById(`grid-${dayIdx}`).style.display = isChecked ? 'grid' : 'none';
+    queueSchedSave();
+  };
+
+  // Автосохранение графика: изменения уходят на сервер через секунду после последнего нажатия.
+  let schedTimer = null, schedSaving = false, schedAgain = false;
+  function schedStatus(text, cls) {
+    const el = document.getElementById('schedStatus');
+    if (el) { el.textContent = text; el.className = 'sched-status' + (cls ? ' ' + cls : ''); }
+  }
+  window.queueSchedSave = function() {
+    clearTimeout(schedTimer);
+    schedStatus('Сохраняем…');
+    schedTimer = setTimeout(saveWeeklySchedule, 800);
   };
 
   window.saveWeeklySchedule = async function() {
-    const btn = document.getElementById('saveSchedBtn');
-    btn.disabled = true;
-    btn.textContent = 'Сохранение...';
+    if (schedSaving) { schedAgain = true; return; }
+    schedSaving = true;
 
     const newSchedule = {};
     DAY_ORDER.forEach(dayIdx => {
-      const isWorking = document.getElementById(`toggle-${dayIdx}`).checked;
-      if (!isWorking) {
-        newSchedule[String(dayIdx)] = [];
+      const toggle = document.getElementById(`toggle-${dayIdx}`);
+      if (!toggle || !toggle.checked) {
+        newSchedule[String(dayIdx)] = toggle ? [] : (weeklySchedule[String(dayIdx)] || []);
       } else {
         const checkedCheckboxes = document.querySelectorAll(`input[name="time-${dayIdx}"]:checked`);
-        const slots = Array.from(checkedCheckboxes).map(cb => cb.value);
-        slots.sort();
-        newSchedule[String(dayIdx)] = slots;
+        newSchedule[String(dayIdx)] = Array.from(checkedCheckboxes).map(cb => cb.value).sort();
       }
     });
 
     try {
       await api('schedule_set', { schedule: newSchedule });
       weeklySchedule = newSchedule;
-      alert('Шаблон графика успешно обновлен и синхронизирован с сайтом записи!');
+      schedStatus('✓ Сохранено, сайт записи обновлён', 'ok');
     } catch (e) {
       console.error(e);
-      alert('Не удалось сохранить изменения. Попробуйте снова.');
+      schedStatus('Не удалось сохранить — нажмите, чтобы повторить', 'err');
+      const el = document.getElementById('schedStatus');
+      if (el) el.onclick = () => { el.onclick = null; queueSchedSave(); };
     } finally {
-      btn.disabled = false;
-      btn.textContent = 'Сохранить график';
+      schedSaving = false;
+      if (schedAgain) { schedAgain = false; saveWeeklySchedule(); }
     }
   };
 
